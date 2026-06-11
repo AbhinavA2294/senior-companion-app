@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\abhin\\\\Downloads\\\\senior-companion\" -Recurse | Select-Object -Property FullName | ForEach-Object { $_.FullName } | Sort-Object)",
+      "PowerShell(npm run *)",
+      "PowerShell(cd \"C:\\\\Users\\\\abhin\\\\Downloads\\\\senior-companion\"; ls node_modules | Where-Object { $_.Name -like \"@typescript-eslint\" } | Select-Object Name)",
+      "PowerShell(cd \"C:\\\\Users\\\\abhin\\\\Downloads\\\\senior-companion\"; npx tsc --noEmit 2>&1; echo \"tsc exit: $LASTEXITCODE\")"
+    ]
+  }
+}

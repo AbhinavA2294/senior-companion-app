@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* shadcn/ui tokens mapped to our sage palette */
+    --background: 0 0% 100%;
+    --foreground: 222 20% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 20% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 20% 12%;
+
+    /* Sage green primary */
+    --primary: 121 20% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 120 15% 92%;
+    --secondary-foreground: 121 20% 25%;
+
+    --muted: 120 10% 95%;
+    --muted-foreground: 120 8% 45%;
+
+    --accent: 120 15% 90%;
+    --accent-foreground: 121 20% 25%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 120 12% 88%;
+    --input: 120 12% 88%;
+    --ring: 121 20% 45%;
+
+    --radius: 0.625rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    /* Smooth scrolling for anchor links */
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Senior-friendly base font size */
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+
+  /* Ensure minimum touch target size of 44px for accessibility */
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role="button"] {
+    @apply min-h-[44px];
+  }
+
+  /* Visible focus styles for keyboard navigation */
+  :focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* High-contrast focus for links within content */
+  a:focus-visible {
+    @apply rounded outline-2 outline-offset-2;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Senior-friendly focus ring */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+}

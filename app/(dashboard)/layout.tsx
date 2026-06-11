@@ -17,6 +17,8 @@ import {
   ShieldCheck,
   Plus,
   Activity,
+  Clock,
+  HelpCircle,
 } from "lucide-react";
 
 type NavItem = { href: string; label: string; icon: React.ElementType };
@@ -40,15 +42,16 @@ function getDashboardNavItems(role: UserRole, basePath: string): NavItem[] {
       { href: "/family/bookings/new", label: "Book a Companion", icon: Plus },
     ],
     companion: [
-      { href: "/companion/bookings", label: "Assigned Bookings", icon: Calendar },
-      { href: "/companion/schedule", label: "My Schedule", icon: ClipboardList },
-      { href: "/companion/ratings", label: "My Reviews", icon: Star },
+      { href: "/companion/bookings", label: "Booking Requests", icon: Calendar },
+      { href: "/companion/schedule", label: "Upcoming Visits", icon: ClipboardList },
+      { href: "/companion/availability", label: "Availability", icon: Clock },
+      { href: "/companion/ratings", label: "My Ratings", icon: Star },
       { href: "/companion/verification", label: "Verification", icon: ShieldCheck },
+      { href: "/companion/support", label: "Support", icon: HelpCircle },
     ],
     admin: [
-      { href: "/admin/bookings", label: "All Bookings", icon: Calendar },
       { href: "/admin/companions", label: "Companions", icon: Users },
-      { href: "/admin/verifications", label: "Verifications", icon: ShieldCheck },
+      { href: "/admin/bookings", label: "Bookings", icon: Calendar },
       { href: "/admin/reports", label: "Incident Reports", icon: ClipboardList },
       { href: "/admin/activity", label: "Activity", icon: Activity },
     ],

@@ -73,6 +73,25 @@ export interface CompanionProfile {
   activity_preferences: string[];
   years_experience: number | null;
   linkedin_url: string | null;
+  // Phase 3 onboarding fields
+  interests: string[];
+  activities_supported: string[];
+  has_prior_experience: boolean;
+  id_verification_status: "not_submitted" | "submitted" | "under_review" | "verified" | "rejected";
+  id_provider_reference: string | null;
+  id_verification_notes: string | null;
+  id_verified_at: string | null;
+  background_check_status: "not_requested" | "requested" | "in_progress" | "completed" | "rejected";
+  background_check_consent: boolean;
+  background_check_consent_at: string | null;
+  background_check_provider_ref: string | null;
+  background_check_admin_notes: string | null;
+  background_check_requested_at: string | null;
+  background_check_completed_at: string | null;
+  code_of_conduct_accepted: boolean;
+  code_of_conduct_accepted_at: string | null;
+  emergency_protocol_completed: boolean;
+  emergency_protocol_completed_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -236,6 +255,75 @@ export interface IncidentReport {
   resolved_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// ─── Booking Assignments ─────────────────────────────────────────────────────
+
+export type AssignmentStatus = "pending" | "accepted" | "declined";
+
+export interface BookingAssignment {
+  id: string;
+  booking_id: string;
+  companion_profile_id: string;
+  assigned_by_profile_id: string;
+  status: AssignmentStatus;
+  assigned_at: string;
+  responded_at: string | null;
+  decline_reason: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ─── Companion Availability ──────────────────────────────────────────────────
+
+export interface CompanionAvailability {
+  id: string;
+  companion_profile_id: string;
+  day_of_week: number; // 0 = Sunday … 6 = Saturday
+  start_time: string; // HH:MM
+  end_time: string; // HH:MM
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// ─── Companion References ────────────────────────────────────────────────────
+
+export interface CompanionReference {
+  id: string;
+  companion_profile_id: string;
+  reference_name: string;
+  reference_phone: string;
+  reference_email: string | null;
+  relationship: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// ─── Companion Training Records ──────────────────────────────────────────────
+
+export interface CompanionTrainingRecord {
+  id: string;
+  companion_profile_id: string;
+  training_type: string;
+  completed_at: string | null;
+  notes: string | null;
+  recorded_by_profile_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ─── Companion Status History ────────────────────────────────────────────────
+
+export interface CompanionStatusHistory {
+  id: string;
+  companion_profile_id: string;
+  previous_status: CompanionVerificationStatus | null;
+  new_status: CompanionVerificationStatus;
+  changed_by_profile_id: string;
+  notes: string | null;
+  created_at: string;
 }
 
 // ─── Auth ────────────────────────────────────────────────────────────────────

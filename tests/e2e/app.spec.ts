@@ -22,7 +22,10 @@ test.describe("Landing page", () => {
     await page.goto("/");
     const bookCta = page.getByRole("link", { name: /book a companion/i }).first();
     await expect(bookCta).toBeVisible();
-    await bookCta.click();
+    await Promise.all([
+      page.waitForURL(/\/register/),
+      bookCta.click(),
+    ]);
     await expect(page).toHaveURL(/\/register/);
   });
 
@@ -30,7 +33,10 @@ test.describe("Landing page", () => {
     await page.goto("/");
     const companionCta = page.getByRole("link", { name: /become a companion/i }).first();
     await expect(companionCta).toBeVisible();
-    await companionCta.click();
+    await Promise.all([
+      page.waitForURL(/\/register/),
+      companionCta.click(),
+    ]);
     await expect(page).toHaveURL(/\/register/);
   });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -22,7 +22,7 @@ const roleOptions = [
   { value: "companion" as const, label: "Companion", description: "I want to provide companionship to seniors", icon: UserCheck },
 ];
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultRole = (searchParams.get("role") ?? "senior") as "senior" | "family" | "companion";
@@ -168,5 +168,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[calc(100vh-5rem)] flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-sage-500" /></div>}>
+      <RegisterForm />
+    </Suspense>
   );
 }

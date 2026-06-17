@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { BookingSchema, type BookingFormData } from "@/lib/validations/booking";
+import { createPaymentForBooking, cancelPaymentForBooking } from "@/lib/actions/payments";
 
 export type ActionResult =
   | { success: true; bookingId?: string }
@@ -82,6 +83,9 @@ export async function createBooking(raw: BookingFormData): Promise<ActionResult>
     return { success: false, error: "Failed to submit booking request. Please try again." };
   }
 
+  // Create and authorize payment (mock: no card required)
+  await createPaymentForBooking(booking.id as string, data.duration_hours);
+
   const role = callerProfile.role as string;
   revalidatePath(`/${role}/bookings`);
   revalidatePath(`/${role}`);
@@ -139,6 +143,9 @@ export async function cancelBooking(bookingId: string): Promise<ActionResult> {
     .eq("id", bookingId);
 
   if (error) return { success: false, error: "Failed to cancel booking. Please try again." };
+
+  // Cancel associated payment if one exists
+  await cancelPaymentForBooking(bookingId);
 
   const role = callerProfile.role as string;
   revalidatePath(`/${role}/bookings`);

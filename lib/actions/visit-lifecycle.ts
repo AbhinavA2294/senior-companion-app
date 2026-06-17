@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { z } from "zod";
+import { capturePaymentForBooking } from "@/lib/actions/payments";
 
 export type ActionResult =
   | { success: true }
@@ -129,9 +130,13 @@ export async function checkOutFromBooking(bookingId: string, visitNote: string, 
     await admin.from("notifications").insert({ profile_id: booking.booked_by_profile_id, title: "Visit complete — please rate your companion", body: `${caller.first_name} ${caller.last_name} has completed the visit (${durationText}). Tap to view the summary and leave a rating.`, channel: "in_app", status: "sent", related_booking_id: bookingId, notification_type: "completion_summary" });
   }
 
+  // Capture the payment now that the visit is complete
+  await capturePaymentForBooking(bookingId);
+
   revalidatePath(`/companion/bookings/${bookingId}`);
   revalidatePath("/companion/bookings");
   revalidatePath("/companion");
+  revalidatePath("/companion/earnings");
   revalidatePath(`/family/bookings/${bookingId}`);
   revalidatePath("/family/bookings");
   return { success: true };

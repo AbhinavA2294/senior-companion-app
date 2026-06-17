@@ -30,6 +30,8 @@ import {
 import { createBooking } from "@/lib/actions/bookings";
 import type { ActivityType, Profile, SeniorProfile } from "@/types";
 import { formatDate, formatTime } from "@/lib/utils";
+import { calculateBookingCost } from "@/lib/payments/payment-service";
+import { PriceBreakdown } from "@/components/payments/price-breakdown";
 
 interface SeniorOption {
   profile: Profile;
@@ -498,7 +500,8 @@ export function BookingWizard({
         );
 
       // ── Step 5: Review & Disclaimer ────────────────────────
-      case 5:
+      case 5: {
+        const bookingCost = calculateBookingCost(watchedValues.duration_hours || 2);
         return (
           <div>
             <h2 className="text-senior-xl font-semibold text-gray-900 mb-1">
@@ -507,6 +510,9 @@ export function BookingWizard({
             <p className="text-senior-sm text-gray-500 mb-6">
               Please review the details below and acknowledge the service disclaimer before submitting.
             </p>
+
+            {/* Price summary — shown before booking details */}
+            <PriceBreakdown cost={bookingCost} className="mb-5" />
 
             {/* Summary */}
             <div className="bg-gray-50 rounded-xl p-5 space-y-3 mb-6">
@@ -571,6 +577,7 @@ export function BookingWizard({
             </div>
           </div>
         );
+      }
 
       default:
         return null;

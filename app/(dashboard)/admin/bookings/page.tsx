@@ -215,7 +215,7 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
                           </td>
                           <td className="py-3 px-2">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <BookingStatusBadge status={b.status as string} />
+                              <BookingStatusBadge status={b.status as import("@/types").BookingStatus} />
                               {b.late_checkin_flag && (
                                 <Badge variant="warning" className="text-xs">Late check-in</Badge>
                               )}

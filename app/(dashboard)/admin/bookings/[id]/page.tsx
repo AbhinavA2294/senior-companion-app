@@ -9,7 +9,9 @@ import { formatDate, formatTime } from "@/lib/utils";
 import { AssignCompanionsForm } from "./_assign";
 import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { InternalNotes } from "@/components/admin/internal-notes";
-import { MockRefundForm } from "@/components/admin/mock-refund-form";
+import { ReceiptCard } from "@/components/payments/receipt-card";
+import { PaymentRefundForm } from "@/components/payments/refund-form";
+import type { PaymentStatus } from "@/lib/payments/types";
 
 export const metadata: Metadata = { title: "Booking Detail – Admin" };
 
@@ -64,11 +66,19 @@ export default async function AdminBookingDetailPage({ params }: Props) {
     .eq("entity_id", params.id)
     .order("created_at", { ascending: false });
 
-  const { data: refunds } = await admin
-    .from("mock_refunds")
-    .select("id, amount, reason, status, created_at")
+  const { data: payment } = await admin
+    .from("payments")
+    .select("id, status, amount_cents, service_amount_cents, booking_fee_cents, platform_fee_cents, companion_payout_cents, currency, authorized_at, captured_at, cancelled_at")
     .eq("booking_id", params.id)
-    .order("created_at", { ascending: false });
+    .maybeSingle();
+
+  const { data: refunds } = payment
+    ? await admin
+        .from("payment_refunds")
+        .select("id, amount_cents, reason, status, created_at")
+        .eq("payment_id", payment.id)
+        .order("created_at", { ascending: false })
+    : { data: [] };
 
   let approvedCompanions: Array<{ id: string; name: string; city: string | null; state: string | null; max_travel_miles: number }> = [];
   const canAssign = ["requested", "assigned"].includes(booking.status as string);
@@ -258,24 +268,44 @@ export default async function AdminBookingDetailPage({ params }: Props) {
         </Card>
       )}
 
-      {/* Mock refund */}
+      {/* Payment */}
       <Card className="border-0 shadow-sm">
-        <CardHeader><CardTitle className="text-senior-base">Mock Refund</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-senior-base">Payment</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          {refunds && refunds.length > 0 && (
-            <ul className="space-y-2 mb-4">
-              {refunds.map((r) => (
-                <li key={r.id} className="flex items-center justify-between text-sm rounded-lg bg-gray-50 border border-gray-200 p-3">
-                  <div>
-                    <p className="font-medium text-gray-800">${(r.amount as number).toFixed(2)} refund</p>
-                    <p className="text-xs text-gray-500">{r.reason as string}</p>
-                  </div>
-                  <span className="text-xs text-gray-400">{new Date(r.created_at).toLocaleDateString()}</span>
-                </li>
-              ))}
-            </ul>
+          {payment ? (
+            <>
+              <ReceiptCard
+                payment={{
+                  id: payment.id as string,
+                  status: payment.status as PaymentStatus,
+                  amountCents: payment.amount_cents as number,
+                  serviceAmountCents: payment.service_amount_cents as number,
+                  bookingFeeCents: payment.booking_fee_cents as number,
+                  platformFeeCents: payment.platform_fee_cents as number,
+                  companionPayoutCents: payment.companion_payout_cents as number,
+                  currency: payment.currency as string,
+                  authorizedAt: payment.authorized_at as string | null,
+                  capturedAt: payment.captured_at as string | null,
+                  cancelledAt: payment.cancelled_at as string | null,
+                }}
+                refunds={(refunds ?? []).map((r) => ({
+                  id: r.id as string,
+                  amountCents: r.amount_cents as number,
+                  reason: r.reason as string,
+                  createdAt: r.created_at as string,
+                  status: r.status as string,
+                }))}
+              />
+              {["captured", "partially_refunded"].includes(payment.status as string) && (
+                <PaymentRefundForm
+                  paymentId={payment.id as string}
+                  maxAmountCents={payment.amount_cents as number}
+                />
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-gray-500">No payment record for this booking.</p>
           )}
-          <MockRefundForm bookingId={params.id} />
         </CardContent>
       </Card>
 

@@ -19,6 +19,7 @@ import {
   Activity,
   Clock,
   HelpCircle,
+  DollarSign,
 } from "lucide-react";
 
 type NavItem = { href: string; label: string; icon: React.ElementType };
@@ -45,6 +46,7 @@ function getDashboardNavItems(role: UserRole, basePath: string): NavItem[] {
       { href: "/companion/bookings", label: "Booking Requests", icon: Calendar },
       { href: "/companion/schedule", label: "Upcoming Visits", icon: ClipboardList },
       { href: "/companion/availability", label: "Availability", icon: Clock },
+      { href: "/companion/earnings", label: "My Earnings", icon: DollarSign },
       { href: "/companion/ratings", label: "My Ratings", icon: Star },
       { href: "/companion/verification", label: "Verification", icon: ShieldCheck },
       { href: "/companion/support", label: "Support", icon: HelpCircle },

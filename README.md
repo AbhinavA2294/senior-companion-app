@@ -18,6 +18,8 @@ Senior Companion is a non-medical companionship marketplace for senior citizens.
 - [Running the App](#running-the-app)
 - [Testing](#testing)
 - [Project Structure](#project-structure)
+- [Payment Architecture](#payment-architecture)
+- [Stripe Connect Integration Path](#stripe-connect-integration-path)
 - [User Roles](#user-roles)
 - [Service Boundaries](#service-boundaries)
 - [Manual Verification Checklist](#manual-verification-checklist)
@@ -436,18 +438,136 @@ After running the app locally, verify the following:
 
 ---
 
+## Payment Architecture
+
+The application uses a `PaymentProvider` interface in `lib/payments/` so payment gateway logic is swappable without rewriting business logic.
+
+### Current: MockPaymentProvider
+
+All payments use `MockPaymentProvider` (no real charges). The singleton lives in `lib/payments/index.ts`:
+
+```ts
+export const paymentProvider: PaymentProvider = new MockPaymentProvider()
+```
+
+### Pricing (configured in `lib/payments/config.ts`)
+
+| Item | Amount |
+|---|---|
+| Hourly rate | $35.00/hr |
+| Platform fee | 20% of service amount |
+| Companion payout | 80% of service amount (~$28.00/hr) |
+| Booking fee | $5.00 (flat, retained by platform) |
+| Cancellation fee | $15.00 |
+| Minimum duration | 2 hours |
+
+### Payment lifecycle
+
+```
+Booking submitted   → payment: authorized
+Visit completed     → payment: captured
+Booking cancelled   → payment: cancelled
+Admin issues refund → payment: refunded / partially_refunded
+```
+
+All financial calculations live in `lib/payments/payment-service.ts` (pure functions, fully tested).
+
+---
+
+## Stripe Connect Integration Path
+
+> **Do not activate Stripe until the full booking flow has been manually tested end-to-end.**
+
+When ready, follow these steps to add live payments:
+
+### 1. Install the Stripe SDK
+
+```bash
+npm install stripe @stripe/stripe-js
+```
+
+### 2. Add environment variables
+
+```env
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_PUBLISHABLE_KEY=pk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+### 3. Implement `StripePaymentProvider`
+
+Create `lib/payments/stripe-provider.ts` implementing the same `PaymentProvider` interface:
+
+```ts
+import Stripe from 'stripe'
+import type { PaymentProvider, GatewayPaymentIntent, ... } from './types'
+
+export class StripePaymentProvider implements PaymentProvider {
+  private stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+
+  async createPaymentIntent(params) {
+    const pi = await this.stripe.paymentIntents.create({
+      amount: params.amountCents,
+      currency: params.currency ?? 'usd',
+      application_fee_amount: params.platformFeeCents,
+      transfer_data: { destination: '<companion_stripe_account_id>' },
+      metadata: { bookingId: params.bookingId },
+    })
+    return { id: pi.id, status: 'pending', amountCents: pi.amount, currency: pi.currency }
+  }
+
+  async capturePayment(providerPaymentId) {
+    const pi = await this.stripe.paymentIntents.capture(providerPaymentId)
+    return { id: pi.id, status: 'captured', amountCents: pi.amount, currency: pi.currency }
+  }
+  // ... implement remaining methods
+}
+```
+
+### 4. Swap the singleton
+
+In `lib/payments/index.ts`, change one line:
+
+```ts
+// Before:
+export const paymentProvider: PaymentProvider = new MockPaymentProvider()
+
+// After:
+export const paymentProvider: PaymentProvider = new StripePaymentProvider()
+```
+
+No other application code changes — all server actions already use `paymentProvider`.
+
+### 5. Companion onboarding (Stripe Connect)
+
+Each companion needs a Stripe Express or Standard account:
+- Add `stripe_account_id` column to `companion_profiles`
+- Redirect companions through Stripe Connect OAuth on their verification page
+- Use `transfer_data.destination` in payment intents to route payouts
+
+### 6. Add Stripe webhook handler
+
+Create `app/api/webhooks/stripe/route.ts` to handle:
+- `payment_intent.succeeded` → update payment status to `captured`
+- `payment_intent.payment_failed` → update to `failed`
+- `charge.refunded` → update to `refunded` / `partially_refunded`
+
+Webhook events provide authoritative status — supplement or replace the optimistic DB writes in server actions.
+
+### 7. Collect payment method at booking
+
+Add a Stripe Elements form to the booking wizard review step (step 5) to tokenize the card. Store only the `payment_method_id` — never the raw card number. The current `PriceBreakdown` component already shows the pricing summary in that step.
+
+---
+
 ## Phase 2 (not yet implemented)
 
-The following features are planned but **not built in Phase 1**:
+The following features are planned but **not built yet**:
 
 - Companion search and matching
-- Booking flow with scheduling
-- Payments and billing
 - SMS/email notifications
 - AI-powered companion recommendations
 - Advanced admin reporting
-- Visit check-in/check-out with location
-- Rating and review submission
 
 ---
 

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import type { CompanionVerificationStatus } from "@/types";
+import { createPaymentForBooking } from "@/lib/actions/payments";
 
 export type ActionResult =
   | { success: true }
@@ -177,7 +178,7 @@ export async function respondToAssignment(
     // Check booking is still waiting for acceptance
     const { data: booking } = await admin
       .from("bookings")
-      .select("id, status")
+      .select("id, status, duration_hours")
       .eq("id", assignment.booking_id as string)
       .single();
 
@@ -211,6 +212,12 @@ export async function respondToAssignment(
       changed_by_profile_id: callerProfile.id,
       notes: "Companion accepted assignment",
     });
+
+    // Authorize payment now that the booking is confirmed
+    await createPaymentForBooking(
+      assignment.booking_id as string,
+      booking.duration_hours as number
+    );
   } else {
     const { error: declineErr } = await admin
       .from("booking_assignments")

@@ -11,6 +11,8 @@ import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
 import { InternalNotes } from "@/components/admin/internal-notes";
 import { ReceiptCard } from "@/components/payments/receipt-card";
 import { PaymentRefundForm } from "@/components/payments/refund-form";
+import { MatchingPanel } from "@/components/admin/matching-panel";
+import { MATCHING_CONFIG } from "@/lib/matching/config";
 import type { PaymentStatus } from "@/lib/payments/types";
 
 export const metadata: Metadata = { title: "Booking Detail – Admin" };
@@ -231,7 +233,24 @@ export default async function AdminBookingDetailPage({ params }: Props) {
         </CardContent>
       </Card>
 
-      {/* Assign companions */}
+      {/* AI-assisted companion matching */}
+      {canAssign && MATCHING_CONFIG.enabled && (
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span>Companion Matching</span>
+              <span className="rounded-full bg-sage-100 px-2 py-0.5 text-xs font-medium text-sage-700">
+                AI-assisted
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <MatchingPanel bookingId={params.id} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Assign companions (manual fallback) */}
       {canAssign && (
         <Card className="border-0 shadow-sm">
           <CardHeader><CardTitle>Assign Companions</CardTitle></CardHeader>

@@ -64,7 +64,7 @@ export async function checkInToBooking(bookingId: string, coords?: { latitude: n
   const now = new Date();
   const windowOpenAt = new Date(scheduledStart.getTime() - CHECKIN_WINDOW_MINUTES * 60 * 1000);
 
-  if (now < windowOpenAt) {
+  if (now < windowOpenAt && process.env.SKIP_CHECKIN_WINDOW !== "true") {
     const minutesUntilOpen = Math.ceil((windowOpenAt.getTime() - now.getTime()) / 60000);
     return { success: false, error: `Check-in opens ${CHECKIN_WINDOW_MINUTES} minutes before the visit (in ${minutesUntilOpen} minutes).` };
   }

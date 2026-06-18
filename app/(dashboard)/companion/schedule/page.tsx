@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, MapPin, ArrowRight } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "My Schedule – Companion" };
@@ -49,38 +50,63 @@ export default async function CompanionSchedulePage() {
     .order("scheduled_date", { ascending: false })
     .limit(10);
 
-  function BookingRow({ booking }: { booking: Record<string, unknown> }) {
+  // Fetch assignment IDs so upcoming rows can link to the check-in page
+  const { data: acceptedAssignments } = await supabase
+    .from("booking_assignments")
+    .select("id, booking_id")
+    .eq("companion_profile_id", cp?.id ?? "")
+    .eq("status", "accepted");
+
+  const assignmentByBookingId = new Map(
+    (acceptedAssignments ?? []).map((a) => [a.booking_id as string, a.id as string])
+  );
+
+  function BookingRow({ booking, assignmentId }: { booking: Record<string, unknown>; assignmentId?: string }) {
     const activityType = booking.activity_type as Record<string, unknown> | null;
+    const status = booking.status as string;
+    const inner = (
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1 min-w-0">
+          <p className="font-semibold text-gray-900 truncate">
+            {(activityType?.name as string) ?? "Companion Visit"}
+          </p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
+            <span className="flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5" />
+              {booking.scheduled_date ? formatDate(booking.scheduled_date as string) : "—"}
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              {booking.scheduled_start_time ? formatTime(booking.scheduled_start_time as string) : "—"}
+              {booking.duration_hours ? ` · ${booking.duration_hours}h` : ""}
+            </span>
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" />
+              <span className="truncate max-w-xs">{(booking.location_description as string) ?? "—"}</span>
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Badge
+            variant={status === "completed" ? "success" : "warning"}
+            className="capitalize"
+          >
+            {status.replace("_", " ")}
+          </Badge>
+          {assignmentId && (
+            <Button size="sm" variant="outline" asChild>
+              <Link href={`/companion/bookings/${assignmentId}`} className="flex items-center gap-1">
+                View details <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+
     return (
       <li className="py-4 border-b border-gray-50 last:border-0">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1 min-w-0">
-            <p className="font-semibold text-gray-900 truncate">
-              {(activityType?.name as string) ?? "Companion Visit"}
-            </p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                {booking.scheduled_date ? formatDate(booking.scheduled_date as string) : "—"}
-              </span>
-              <span className="flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" />
-                {booking.scheduled_start_time ? formatTime(booking.scheduled_start_time as string) : "—"}
-                {booking.duration_hours ? ` · ${booking.duration_hours}h` : ""}
-              </span>
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5" />
-                <span className="truncate max-w-xs">{(booking.location_description as string) ?? "—"}</span>
-              </span>
-            </div>
-          </div>
-          <Badge
-            variant={(booking.status as string) === "completed" ? "success" : "warning"}
-            className="capitalize flex-shrink-0"
-          >
-            {(booking.status as string).replace("_", " ")}
-          </Badge>
-        </div>
+        {inner}
       </li>
     );
   }
@@ -112,7 +138,11 @@ export default async function CompanionSchedulePage() {
           ) : (
             <ul>
               {upcoming.map((b) => (
-                <BookingRow key={b.id} booking={b as unknown as Record<string, unknown>} />
+                <BookingRow
+                  key={b.id}
+                  booking={b as unknown as Record<string, unknown>}
+                  assignmentId={assignmentByBookingId.get(b.id)}
+                />
               ))}
             </ul>
           )}

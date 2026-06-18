@@ -214,10 +214,13 @@ export async function respondToAssignment(
     });
 
     // Authorize payment now that the booking is confirmed
-    await createPaymentForBooking(
+    const paymentResult = await createPaymentForBooking(
       assignment.booking_id as string,
       booking.duration_hours as number
     );
+    if (!paymentResult.success) {
+      console.error("[respondToAssignment] payment creation failed:", paymentResult.error);
+    }
   } else {
     const { error: declineErr } = await admin
       .from("booking_assignments")

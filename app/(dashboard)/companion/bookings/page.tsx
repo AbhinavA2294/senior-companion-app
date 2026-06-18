@@ -138,18 +138,23 @@ export default async function CompanionBookingsPage() {
                 const b = a.booking as any;
                 const variant = a.status === "accepted" ? "success" : "secondary";
                 return (
-                  <li key={a.id} className="py-3 flex items-center justify-between gap-4">
-                    <div className="space-y-0.5 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">
-                        {b?.activity_type?.name ?? "Companion Visit"}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {b?.scheduled_date ? formatDate(b.scheduled_date) : "—"}
-                      </p>
-                    </div>
-                    <Badge variant={variant} className="capitalize flex-shrink-0">
-                      {a.status as string}
-                    </Badge>
+                  <li key={a.id}>
+                    <Link
+                      href={`/companion/bookings/${a.id}`}
+                      className="py-3 flex items-center justify-between gap-4 hover:bg-gray-50 rounded-xl px-3 -mx-3 transition-colors"
+                    >
+                      <div className="space-y-0.5 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 truncate">
+                          {b?.activity_type?.name ?? "Companion Visit"}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {b?.scheduled_date ? formatDate(b.scheduled_date) : "—"}
+                        </p>
+                      </div>
+                      <Badge variant={variant} className="capitalize flex-shrink-0">
+                        {a.status as string}
+                      </Badge>
+                    </Link>
                   </li>
                 );
               })}

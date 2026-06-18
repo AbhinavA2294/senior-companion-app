@@ -8,7 +8,20 @@
       "Bash(npx tsc *)",
       "Bash(npx vitest *)",
       "Bash(npm run *)",
-      "Bash(npx supabase *)"
+      "Bash(npx supabase *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\abhin\\\\Downloads\\\\senior-companion\")",
+      "Bash(Select-Object Name, Mode)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\abhin\\\\Downloads\\\\senior-companion\\\\app\" -Recurse | Where-Object {$_.PSIsContainer} | Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\abhin\\\\Downloads\\\\senior-companion\\\\components\" -Recurse | Where-Object {$_.PSIsContainer} | Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\abhin\\\\Downloads\\\\senior-companion\\\\lib\" -Recurse | Where-Object {$_.PSIsContainer} | Select-Object FullName)",
+      "Bash(npm test *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(git check-ignore *)",
+      "Bash(Get-Content .gitignore -Tail 10)",
+      "Bash(Format-Hex)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }

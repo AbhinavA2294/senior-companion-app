@@ -1,0 +1,73 @@
+{
+  "common": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "edit": "Edit",
+    "back": "Back",
+    "loading": "Loading…",
+    "confirm": "Confirm",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "required": "Required"
+  },
+  "nav": {
+    "accessibility": "Accessibility"
+  },
+  "voice": {
+    "title": "Voice-Assisted Booking",
+    "subtitle": "Describe your request in plain language, or type it below. We will extract the details for you to review.",
+    "inputLabel": "Describe your booking request",
+    "inputPlaceholder": "e.g. \"I need someone to accompany my mother to her eye doctor appointment next Wednesday at 10 AM for about two hours.\"",
+    "micButton": "Start speaking",
+    "micStop": "Stop recording",
+    "listening": "Listening…",
+    "extractButton": "Extract Details",
+    "processingLabel": "Extracting details…",
+    "reviewTitle": "Review Your Booking Request",
+    "reviewSubtitle": "Please check the details below and correct anything that isn't right before submitting.",
+    "editFields": "You can edit any field below.",
+    "confirmButton": "Confirm & Submit Booking",
+    "backToInput": "← Edit request",
+    "sensitiveDataWarning": "Please do not include medical records, diagnoses, medications, or insurance information in your request.",
+    "medicalContextNote": "We noticed this may be a medical appointment. Our companions provide non-medical companionship and chaperoning only — they do not provide medical care, advice, or assistance.",
+    "externalProviderDisabled": "Voice transcription is handled locally. No audio is sent to external services.",
+    "noSeniorLinked": "No seniors are linked to your account. Please add a senior before booking.",
+    "disclaimerLabel": "I understand this is a non-medical companionship service. Companions do not provide medical care, advice, or procedures.",
+    "disclaimerRequired": "You must acknowledge the disclaimer before submitting.",
+    "manualBookingLink": "Prefer to fill out the form manually?",
+    "tryExample": "Try an example"
+  },
+  "field": {
+    "senior": "Who is this visit for?",
+    "activityType": "Activity type",
+    "date": "Date",
+    "startTime": "Start time",
+    "duration": "Duration (hours)",
+    "location": "Meeting location",
+    "destination": "Destination address",
+    "notes": "Special notes"
+  },
+  "accessibility": {
+    "title": "Accessibility Settings",
+    "subtitle": "Adjust the display to make the app easier to use.",
+    "language": "Display language",
+    "languageHint": "Changes the language of buttons and labels throughout the app.",
+    "textSize": "Text size",
+    "textNormal": "Normal",
+    "textLarge": "Large",
+    "textXl": "Extra large",
+    "textPreview": "The quick brown fox jumps over the lazy dog.",
+    "reducedComplexity": "Simplified dashboard",
+    "reducedComplexityHint": "Hides advanced statistics and shows only the most important information.",
+    "saved": "Settings saved",
+    "resetDefaults": "Reset to defaults"
+  },
+  "booking": {
+    "disclaimerTitle": "Non-Medical Service Disclaimer",
+    "disclaimer": "Senior Companion provides non-medical companionship and chaperoning services only. Our companions are not healthcare professionals and do not provide medical care, advice, treatment, or assistance with medications."
+  }
+}

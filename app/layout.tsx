@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import { Playfair_Display } from "next/font/google";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { LanguageProvider } from "@/lib/i18n";
+import { AccessibilityProvider } from "@/components/accessibility/accessibility-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -48,17 +50,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-sage-600 focus:px-4 focus:py-2 focus:text-white focus:text-senior-base focus:font-semibold"
-        >
-          Skip to main content
-        </a>
-        <Navbar />
-        <main id="main-content" tabIndex={-1}>
-          {children}
-        </main>
-        <Footer />
+        <AccessibilityProvider>
+          <LanguageProvider>
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-sage-600 focus:px-4 focus:py-2 focus:text-white focus:text-senior-base focus:font-semibold"
+            >
+              Skip to main content
+            </a>
+            <Navbar />
+            <main id="main-content" tabIndex={-1}>
+              {children}
+            </main>
+            <Footer />
+          </LanguageProvider>
+        </AccessibilityProvider>
       </body>
     </html>
   );

@@ -60,6 +60,20 @@ export default async function NewSeniorBookingPage() {
         </p>
       </Alert>
 
+      <div className="mb-4 flex items-center gap-3 rounded-xl border border-sage-100 bg-sage-50 px-4 py-3">
+        <span className="text-lg">🎙️</span>
+        <div className="flex-1">
+          <p className="text-sm font-medium text-sage-800">Prefer to describe your request in your own words?</p>
+          <p className="text-xs text-sage-600">Try voice-assisted booking — we'll extract the details for you.</p>
+        </div>
+        <Link
+          href="/senior/bookings/new/voice"
+          className="rounded-lg border border-sage-300 bg-white px-3 py-1.5 text-xs font-semibold text-sage-700 hover:bg-sage-50 whitespace-nowrap"
+        >
+          Try it →
+        </Link>
+      </div>
+
       <Card className="border-0 shadow-sm">
         <CardContent className="pt-6 pb-6">
           <BookingWizard

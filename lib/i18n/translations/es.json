@@ -1,0 +1,73 @@
+{
+  "common": {
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "save": "Guardar cambios",
+    "edit": "Editar",
+    "back": "Regresar",
+    "loading": "Cargando…",
+    "confirm": "Confirmar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "close": "Cerrar",
+    "yes": "Sí",
+    "no": "No",
+    "required": "Obligatorio"
+  },
+  "nav": {
+    "accessibility": "Accesibilidad"
+  },
+  "voice": {
+    "title": "Reserva por Voz",
+    "subtitle": "Describa su solicitud en lenguaje sencillo o escríbala a continuación.",
+    "inputLabel": "Describa su solicitud de reserva",
+    "inputPlaceholder": "p. ej. \"Necesito a alguien que acompañe a mi madre a su cita con el médico el próximo miércoles a las 10 AM por unas dos horas.\"",
+    "micButton": "Comenzar a hablar",
+    "micStop": "Detener grabación",
+    "listening": "Escuchando…",
+    "extractButton": "Extraer detalles",
+    "processingLabel": "Extrayendo detalles…",
+    "reviewTitle": "Revise su solicitud de reserva",
+    "reviewSubtitle": "Por favor verifique los detalles a continuación y corrija lo que no esté bien antes de enviar.",
+    "editFields": "Puede editar cualquier campo a continuación.",
+    "confirmButton": "Confirmar y enviar reserva",
+    "backToInput": "← Editar solicitud",
+    "sensitiveDataWarning": "Por favor no incluya registros médicos, diagnósticos, medicamentos o información de seguro.",
+    "medicalContextNote": "Notamos que esto puede ser una cita médica. Nuestros compañeros solo brindan compañía no médica — no brindan atención médica.",
+    "externalProviderDisabled": "La transcripción de voz se maneja localmente. No se envía audio a servicios externos.",
+    "noSeniorLinked": "No hay personas mayores vinculadas a su cuenta.",
+    "disclaimerLabel": "Entiendo que este es un servicio de compañía no médica.",
+    "disclaimerRequired": "Debe reconocer el descargo de responsabilidad antes de enviar.",
+    "manualBookingLink": "¿Prefiere completar el formulario manualmente?",
+    "tryExample": "Probar un ejemplo"
+  },
+  "field": {
+    "senior": "¿Para quién es esta visita?",
+    "activityType": "Tipo de actividad",
+    "date": "Fecha",
+    "startTime": "Hora de inicio",
+    "duration": "Duración (horas)",
+    "location": "Lugar de reunión",
+    "destination": "Dirección de destino",
+    "notes": "Notas especiales"
+  },
+  "accessibility": {
+    "title": "Configuración de accesibilidad",
+    "subtitle": "Ajuste la pantalla para facilitar el uso de la aplicación.",
+    "language": "Idioma de visualización",
+    "languageHint": "Cambia el idioma de los botones y etiquetas en toda la aplicación.",
+    "textSize": "Tamaño del texto",
+    "textNormal": "Normal",
+    "textLarge": "Grande",
+    "textXl": "Extra grande",
+    "textPreview": "El rápido zorro marrón salta sobre el perro perezoso.",
+    "reducedComplexity": "Panel simplificado",
+    "reducedComplexityHint": "Oculta estadísticas avanzadas y muestra solo la información más importante.",
+    "saved": "Configuración guardada",
+    "resetDefaults": "Restablecer valores predeterminados"
+  },
+  "booking": {
+    "disclaimerTitle": "Descargo de responsabilidad de servicio no médico",
+    "disclaimer": "Senior Companion proporciona servicios de compañía y acompañamiento no médicos únicamente."
+  }
+}

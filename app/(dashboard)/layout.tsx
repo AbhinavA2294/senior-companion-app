@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getRoleLabel, getDashboardPath } from "@/lib/utils";
 import type { UserRole } from "@/types";
+import { LanguageSelector } from "@/components/i18n/language-selector";
 import {
   Heart,
   Bell,
@@ -20,6 +21,7 @@ import {
   Clock,
   HelpCircle,
   DollarSign,
+  Settings,
 } from "lucide-react";
 
 type NavItem = { href: string; label: string; icon: React.ElementType };
@@ -29,6 +31,7 @@ function getDashboardNavItems(role: UserRole, basePath: string): NavItem[] {
     { href: basePath, label: "Dashboard", icon: LayoutDashboard },
     { href: `${basePath}/profile`, label: "My Profile", icon: User },
     { href: `${basePath}/notifications`, label: "Notifications", icon: Bell },
+    { href: "/settings/accessibility", label: "Accessibility", icon: Settings },
   ];
 
   const roleSpecific: Record<UserRole, NavItem[]> = {
@@ -103,6 +106,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
 
           <div className="flex items-center gap-2">
+            <LanguageSelector compact />
             <button
               className="relative h-10 w-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-500 transition-colors"
               aria-label="Notifications"

@@ -154,6 +154,16 @@ export async function submitIncidentReport(raw: IncidentFormData): Promise<Actio
   const { data: booking } = await admin.from("bookings").select("id, booked_by_profile_id, senior_profile_id, companion_profile_id").eq("id", data.bookingId).single();
   if (!booking) return { success: false, error: "Booking not found." };
 
+  // Verify the caller was actually a participant in this booking.
+  const { data: callerCp } = await admin.from("companion_profiles").select("id").eq("profile_id", caller.id).single();
+  const isParticipant =
+    booking.senior_profile_id === caller.id ||
+    booking.booked_by_profile_id === caller.id ||
+    (callerCp && booking.companion_profile_id === callerCp.id);
+  if (!isParticipant) {
+    return { success: false, error: "You were not a participant in this booking." };
+  }
+
   const { error: insertErr } = await admin.from("incident_reports").insert({ booking_id: data.bookingId, reported_by_profile_id: caller.id, reported_by_role: caller.role, category: data.category, description: data.description, severity: data.severity });
   if (insertErr) return { success: false, error: "Failed to submit incident report. Please try again." };
 
@@ -190,9 +200,19 @@ export async function submitRating(raw: RatingFormData): Promise<ActionResult> {
   if (!caller) return { success: false, error: "Not authenticated." };
 
   const admin = createAdminClient();
-  const { data: booking } = await admin.from("bookings").select("id, status").eq("id", data.bookingId).single();
+  const { data: booking } = await admin.from("bookings").select("id, status, senior_profile_id, booked_by_profile_id, companion_profile_id").eq("id", data.bookingId).single();
   if (!booking) return { success: false, error: "Booking not found." };
   if (booking.status !== "completed") return { success: false, error: "Ratings can only be submitted for completed visits." };
+
+  // Verify the caller was a participant in this booking.
+  const { data: callerCp } = await admin.from("companion_profiles").select("id").eq("profile_id", caller.id).single();
+  const isParticipant =
+    booking.senior_profile_id === caller.id ||
+    booking.booked_by_profile_id === caller.id ||
+    (callerCp && booking.companion_profile_id === callerCp.id);
+  if (!isParticipant) {
+    return { success: false, error: "You were not a participant in this booking." };
+  }
 
   const { error } = await admin.from("ratings").insert({ booking_id: data.bookingId, rated_by_profile_id: caller.id, rated_profile_id: data.ratedProfileId, rating: data.rating, comment: data.comment || null });
   if (error) {

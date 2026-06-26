@@ -1,3 +1,4 @@
+$content = @'
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -8,7 +9,7 @@ import { ShieldCheck, User, Phone, MapPin, Languages, Clock, CheckCircle, XCircl
 import { CompanionStatusActions } from "./_actions";
 import type { CompanionVerificationStatus } from "@/types";
 
-export const metadata: Metadata = { title: "Companion Review – Admin" };
+export const metadata: Metadata = { title: "Companion Review - Admin" };
 
 interface Props {
   params: { id: string };
@@ -16,18 +17,17 @@ interface Props {
 
 export default async function AdminCompanionDetailPage({ params }: Props) {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: adminProfile } = await admin
+  const { data: adminProfile } = await supabase
     .from("profiles")
     .select("role")
     .eq("user_id", user.id)
     .single();
   if (adminProfile?.role !== "admin") redirect("/login");
-	const admin = createAdminClient();
+
+  const admin = createAdminClient();
 
   const { data: cp } = await admin
     .from("companion_profiles")
@@ -76,7 +76,7 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
     <div className="max-w-2xl space-y-6">
       <div>
         <Link href="/admin/companions" className="text-sm text-sage-600 hover:underline mb-2 inline-block">
-          ? Back to companions
+          &larr; Back to companions
         </Link>
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -92,7 +92,6 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Admin actions */}
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -108,7 +107,6 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
         </CardContent>
       </Card>
 
-      {/* Basic info */}
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -122,15 +120,14 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
               <p className="text-xs text-gray-400">Phone</p>
               <p className="font-medium flex items-center gap-1">
                 <Phone className="h-3.5 w-3.5 text-gray-400" />
-                {profile?.phone ?? "—"}
+                {profile?.phone ?? "-"}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-400">Location</p>
               <p className="font-medium flex items-center gap-1">
                 <MapPin className="h-3.5 w-3.5 text-gray-400" />
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {profile?.city && profile?.state ? `${profile.city}, ${profile.state}` : (profile as any)?.street_address ?? "—"}
+                {profile?.city && profile?.state ? `${profile.city}, ${profile.state}` : (profile as any)?.street_address ?? "-"}
               </p>
             </div>
             <div>
@@ -179,7 +176,6 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
         </CardContent>
       </Card>
 
-      {/* Compliance checklist */}
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <CardTitle>Compliance Checklist</CardTitle>
@@ -197,7 +193,6 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
             <Check value={(cp as Record<string, unknown>).emergency_protocol_completed} />
             <span className="text-gray-700">Emergency protocol completed</span>
           </div>
-
           <div className="pt-2 border-t border-gray-50 mt-2 space-y-1">
             <p className="text-xs text-gray-400">ID verification status</p>
             <Badge variant="secondary" className="capitalize text-xs">
@@ -207,7 +202,6 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
               <p className="text-xs text-gray-500 mt-0.5">{(cp as Record<string, unknown>).id_verification_notes as string}</p>
             )}
           </div>
-
           <div className="pt-2 border-t border-gray-50 space-y-1">
             <p className="text-xs text-gray-400">Background check status</p>
             <Badge variant="secondary" className="capitalize text-xs">
@@ -220,7 +214,6 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
         </CardContent>
       </Card>
 
-      {/* References */}
       {refs && refs.length > 0 && (
         <Card className="border-0 shadow-sm">
           <CardHeader>
@@ -239,7 +232,6 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
         </Card>
       )}
 
-      {/* Status history */}
       {statusHistory && statusHistory.length > 0 && (
         <Card className="border-0 shadow-sm">
           <CardHeader>
@@ -248,7 +240,6 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
           <CardContent>
             <ul className="space-y-2">
               {statusHistory.map((h) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const changedBy = h.changed_by as any;
                 return (
                   <li key={h.id} className="text-sm flex items-start gap-3">
@@ -281,4 +272,5 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
     </div>
   );
 }
-
+'@
+[System.IO.File]::WriteAllText("$PWD\app\(dashboard)\admin\companions\[id]\page.tsx", $content, [System.Text.Encoding]::UTF8)

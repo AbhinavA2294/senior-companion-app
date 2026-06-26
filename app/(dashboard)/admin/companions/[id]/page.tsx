@@ -275,5 +275,3 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
     </div>
   );
 }
-'@
-[System.IO.File]::WriteAllText("$PWD\app\(dashboard)\admin\companions\[id]\page.tsx", $content, [System.Text.Encoding]::UTF8)

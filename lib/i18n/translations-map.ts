@@ -1,4 +1,4 @@
-import en from "./translations/en.json";
+﻿import en from "./translations/en.json";
 import es from "./translations/es.json";
 import hi from "./translations/hi.json";
 import ta from "./translations/ta.json";
@@ -23,49 +23,55 @@ import uk from "./translations/uk.json";
 import gu from "./translations/gu.json";
 import kn from "./translations/kn.json";
 import ml from "./translations/ml.json";
+import pl from "./translations/pl.json";
+import sv from "./translations/sv.json";
+import no_ from "./translations/no.json";
+import da from "./translations/da.json";
+import fi from "./translations/fi.json";
+import id_ from "./translations/id.json";
+import ro from "./translations/ro.json";
+import th from "./translations/th.json";
+import sw from "./translations/sw.json";
+import tl from "./translations/tl.json";
+import fa from "./translations/fa.json";
+import he from "./translations/he.json";
+import cs from "./translations/cs.json";
+import el from "./translations/el.json";
+import bg from "./translations/bg.json";
+import or_ from "./translations/or.json";
 
 export type SupportedLocale =
   | "en" | "es" | "hi" | "ta" | "zh" | "ar" | "bn" | "pt"
   | "ru" | "ja" | "pa" | "mr" | "te" | "ko" | "fr" | "de"
-  | "vi" | "ur" | "tr" | "it" | "nl" | "uk" | "gu" | "kn" | "ml";
+  | "vi" | "ur" | "tr" | "it" | "nl" | "uk" | "gu" | "kn" | "ml"
+  | "pl" | "sv" | "no" | "da" | "fi" | "id" | "ro" | "th"
+  | "sw" | "tl" | "fa" | "he" | "cs" | "el" | "bg" | "or";
 
 export const LOCALE_LABELS: Record<SupportedLocale, string> = {
-  en: "English",
-  es: "Spanish",
-  ar: "Arabic",
-  bn: "Bengali",
-  zh: "Chinese",
-  nl: "Dutch",
-  fr: "French",
-  de: "German",
-  gu: "Gujarati",
-  hi: "Hindi",
-  it: "Italian",
-  ja: "Japanese",
-  kn: "Kannada",
-  ko: "Korean",
-  ml: "Malayalam",
-  mr: "Marathi",
-  pt: "Portuguese",
-  pa: "Punjabi",
-  ru: "Russian",
-  ta: "Tamil",
-  te: "Telugu",
-  tr: "Turkish",
-  uk: "Ukrainian",
-  ur: "Urdu",
-  vi: "Vietnamese",
+  en: "English", es: "Spanish", ar: "Arabic", bn: "Bengali", zh: "Chinese",
+  nl: "Dutch", fr: "French", de: "German", gu: "Gujarati", hi: "Hindi",
+  it: "Italian", ja: "Japanese", kn: "Kannada", ko: "Korean", ml: "Malayalam",
+  mr: "Marathi", pt: "Portuguese", pa: "Punjabi", ru: "Russian", ta: "Tamil",
+  te: "Telugu", tr: "Turkish", uk: "Ukrainian", ur: "Urdu", vi: "Vietnamese",
+  pl: "Polish", sv: "Swedish", no: "Norwegian", da: "Danish", fi: "Finnish",
+  id: "Indonesian", ro: "Romanian", th: "Thai", sw: "Swahili", tl: "Filipino",
+  fa: "Persian", he: "Hebrew", cs: "Czech", el: "Greek", bg: "Bulgarian", or: "Odia",
 };
 
 export const SUPPORTED_LOCALES: SupportedLocale[] = [
-  "en", "es",
-  "ar", "bn", "zh", "nl", "fr", "de", "gu", "hi",
-  "it", "ja", "kn", "ko", "ml", "mr", "pt", "pa",
-  "ru", "ta", "te", "tr", "uk", "ur", "vi",
+  "en", "es", "ar", "bn", "zh", "nl", "fr", "de", "gu", "hi",
+  "it", "ja", "kn", "ko", "ml", "mr", "pt", "pa", "ru", "ta",
+  "te", "tr", "uk", "ur", "vi", "pl", "sv", "no", "da", "fi",
+  "id", "ro", "th", "sw", "tl", "fa", "he", "cs", "el", "bg", "or",
 ];
 
 export const TRANSLATIONS: Record<string, Record<string, unknown>> = {
-  en, es, hi, ta, zh, ar, bn, pt, ru, ja, pa, mr, te, ko, fr, de, vi, ur, tr, it, nl, uk, gu, kn, ml,
+  en, es, hi, ta, zh, ar, bn, pt, ru, ja, pa, mr, te, ko, fr, de,
+  vi, ur, tr, it, nl, uk, gu, kn, ml, pl, sv, da, fi, ro, th, sw,
+  tl, fa, he, cs, el, bg,
+  "no": no_,
+  "id": id_,
+  "or": or_,
 };
 
 export function getNestedValue(obj: Record<string, unknown>, key: string): string {

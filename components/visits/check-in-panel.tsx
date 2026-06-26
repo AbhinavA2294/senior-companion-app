@@ -8,6 +8,7 @@ import { Alert } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { MapPin, MapPinOff, LogIn, AlertTriangle, Phone } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface Props {
   bookingId: string;
@@ -23,6 +24,7 @@ type GeoState =
   | { status: "skipped" };
 
 export function CheckInPanel({ bookingId, scheduledDate, scheduledTime }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -49,6 +51,10 @@ export function CheckInPanel({ bookingId, scheduledDate, scheduledTime }: Props)
     });
   }
 
+  const checkinSubtitle = t("visitPanel.checkinSubtitle")
+    .replace("{date}", scheduledDate)
+    .replace("{time}", scheduledTime);
+
   return (
     <div className="space-y-5">
       <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4">
@@ -57,16 +63,16 @@ export function CheckInPanel({ bookingId, scheduledDate, scheduledTime }: Props)
             <Phone className="h-5 w-5 text-red-600" aria-hidden="true" />
           </div>
           <div>
-            <p className="font-semibold text-red-800 text-sm">Emergency Support</p>
-            <p className="text-xs text-red-600">Tap to see emergency information</p>
+            <p className="font-semibold text-red-800 text-sm">{t("visitPanel.emergencyTitle")}</p>
+            <p className="text-xs text-red-600">{t("visitPanel.emergencyTap")}</p>
           </div>
         </button>
         {showEmergency && (
           <div className="mt-3 rounded-lg bg-red-100 border border-red-300 p-4 text-sm text-red-900">
-            <p className="font-bold text-base mb-1">⚠️ If there is an immediate danger or medical emergency, call 911.</p>
-            <p className="mb-2"><strong>Senior Companion is not an emergency-response service.</strong></p>
+            <p className="font-bold text-base mb-1">⚠️ {t("visitPanel.emergencyWarn")}</p>
+            <p className="mb-2"><strong>{t("visitPanel.notEmergency")}</strong></p>
             <a href="tel:911" className="mt-3 inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-red-700 transition-colors">
-              <Phone className="h-4 w-4" />Call 911
+              <Phone className="h-4 w-4" />{t("visitPanel.call911")}
             </a>
           </div>
         )}
@@ -74,8 +80,8 @@ export function CheckInPanel({ bookingId, scheduledDate, scheduledTime }: Props)
 
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-4">
         <div>
-          <h3 className="font-semibold text-gray-900 text-base">Check In</h3>
-          <p className="text-sm text-gray-500 mt-0.5">Confirm your arrival for this visit on <span className="font-medium">{scheduledDate}</span> at <span className="font-medium">{scheduledTime}</span>.</p>
+          <h3 className="font-semibold text-gray-900 text-base">{t("visitPanel.checkinTitle")}</h3>
+          <p className="text-sm text-gray-500 mt-0.5">{checkinSubtitle}</p>
         </div>
 
         {serverError && (
@@ -86,26 +92,26 @@ export function CheckInPanel({ bookingId, scheduledDate, scheduledTime }: Props)
         )}
 
         <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 space-y-3">
-          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Optional: Location confirmation</p>
-          <p className="text-sm text-gray-600">You may optionally share your current location as a one-time check-in confirmation. Location is <strong>not tracked continuously</strong>.</p>
+          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("visitPanel.locationSectionTitle")}</p>
+          <p className="text-sm text-gray-600">{t("visitPanel.locationDesc")}</p>
           <div className="flex items-start gap-2">
             <Checkbox id="geo-consent" checked={geoConsent} onCheckedChange={(v) => { setGeoConsent(!!v); if (!v) setGeoState({ status: "idle" }); }} />
-            <Label htmlFor="geo-consent" className="text-sm leading-snug cursor-pointer">I consent to sharing my location for this check-in only</Label>
+            <Label htmlFor="geo-consent" className="text-sm leading-snug cursor-pointer">{t("visitPanel.locationConsent")}</Label>
           </div>
           {geoConsent && (
             <div className="space-y-2">
-              {geoState.status === "idle" && <Button variant="outline" size="sm" onClick={requestLocation} className="flex items-center gap-2"><MapPin className="h-4 w-4" />Share location</Button>}
-              {geoState.status === "requesting" && <p className="text-sm text-gray-500">Requesting location…</p>}
-              {geoState.status === "granted" && <p className="text-sm text-sage-700 flex items-center gap-2"><MapPin className="h-4 w-4 text-sage-500" />Location captured</p>}
-              {geoState.status === "denied" && <p className="text-sm text-warm-700 flex items-center gap-2"><MapPinOff className="h-4 w-4" />Location unavailable — checking in without location</p>}
+              {geoState.status === "idle" && <Button variant="outline" size="sm" onClick={requestLocation} className="flex items-center gap-2"><MapPin className="h-4 w-4" />{t("visitPanel.shareLocation")}</Button>}
+              {geoState.status === "requesting" && <p className="text-sm text-gray-500">{t("visitPanel.requestingLocation")}</p>}
+              {geoState.status === "granted" && <p className="text-sm text-sage-700 flex items-center gap-2"><MapPin className="h-4 w-4 text-sage-500" />{t("visitPanel.locationCaptured")}</p>}
+              {geoState.status === "denied" && <p className="text-sm text-warm-700 flex items-center gap-2"><MapPinOff className="h-4 w-4" />{t("visitPanel.locationDenied")}</p>}
             </div>
           )}
-          {!geoConsent && <p className="text-xs text-gray-400 flex items-center gap-1.5"><MapPinOff className="h-3.5 w-3.5" />Checking in without location is fine.</p>}
+          {!geoConsent && <p className="text-xs text-gray-400 flex items-center gap-1.5"><MapPinOff className="h-3.5 w-3.5" />{t("visitPanel.locationSkipped")}</p>}
         </div>
 
         <Button onClick={handleCheckIn} disabled={isPending} className="flex items-center gap-2 w-full sm:w-auto" size="lg">
           <LogIn className="h-4 w-4" aria-hidden="true" />
-          {isPending ? "Checking in…" : "Confirm Check-In"}
+          {isPending ? t("visitPanel.checkinPending") : t("visitPanel.checkinConfirm")}
         </Button>
       </div>
     </div>

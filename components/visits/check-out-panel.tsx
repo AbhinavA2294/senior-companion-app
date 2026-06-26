@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertTriangle, LogOut, MapPin, MapPinOff, Info } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 const NOTE_MAX = 1000;
 const SENSITIVE_INFO_WARNING = `Do not include medical records, diagnoses, medication details, financial information, or other sensitive documents in visit notes. Notes are visible to family members and administrators.`;
@@ -24,6 +25,7 @@ type GeoState =
   | { status: "denied" };
 
 export function CheckOutPanel({ bookingId }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [note, setNote] = useState("");
@@ -57,8 +59,8 @@ export function CheckOutPanel({ bookingId }: Props) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-5">
       <div>
-        <h3 className="font-semibold text-gray-900 text-base">Check Out</h3>
-        <p className="text-sm text-gray-500 mt-0.5">Record the end of your visit and write a brief note for the family.</p>
+        <h3 className="font-semibold text-gray-900 text-base">{t("visitPanel.checkoutTitle")}</h3>
+        <p className="text-sm text-gray-500 mt-0.5">{t("visitPanel.checkoutSubtitle")}</p>
       </div>
 
       {serverError && (
@@ -83,24 +85,24 @@ export function CheckOutPanel({ bookingId }: Props) {
       </div>
 
       <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 space-y-3">
-        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Optional: Location confirmation</p>
+        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t("visitPanel.locationSectionTitle")}</p>
         <div className="flex items-start gap-2">
           <Checkbox id="geo-consent-out" checked={geoConsent} onCheckedChange={(v) => { setGeoConsent(!!v); if (!v) setGeoState({ status: "idle" }); }} />
-          <Label htmlFor="geo-consent-out" className="text-sm leading-snug cursor-pointer">Share my location for check-out confirmation (optional)</Label>
+          <Label htmlFor="geo-consent-out" className="text-sm leading-snug cursor-pointer">{t("visitPanel.locationConsent")}</Label>
         </div>
         {geoConsent && (
           <div>
-            {geoState.status === "idle" && <Button variant="outline" size="sm" onClick={requestLocation} className="flex items-center gap-2"><MapPin className="h-4 w-4" />Share location</Button>}
-            {geoState.status === "requesting" && <p className="text-sm text-gray-500">Requesting location…</p>}
-            {geoState.status === "granted" && <p className="text-sm text-sage-700 flex items-center gap-2"><MapPin className="h-4 w-4 text-sage-500" />Location captured</p>}
-            {geoState.status === "denied" && <p className="text-sm text-warm-700 flex items-center gap-2"><MapPinOff className="h-4 w-4" />Location unavailable</p>}
+            {geoState.status === "idle" && <Button variant="outline" size="sm" onClick={requestLocation} className="flex items-center gap-2"><MapPin className="h-4 w-4" />{t("visitPanel.shareLocation")}</Button>}
+            {geoState.status === "requesting" && <p className="text-sm text-gray-500">{t("visitPanel.requestingLocation")}</p>}
+            {geoState.status === "granted" && <p className="text-sm text-sage-700 flex items-center gap-2"><MapPin className="h-4 w-4 text-sage-500" />{t("visitPanel.locationCaptured")}</p>}
+            {geoState.status === "denied" && <p className="text-sm text-warm-700 flex items-center gap-2"><MapPinOff className="h-4 w-4" />{t("visitPanel.locationDenied")}</p>}
           </div>
         )}
       </div>
 
       <Button onClick={handleCheckOut} disabled={isPending || note.length > NOTE_MAX} size="lg" className="flex items-center gap-2 w-full sm:w-auto">
         <LogOut className="h-4 w-4" aria-hidden="true" />
-        {isPending ? "Checking out…" : "Confirm Check-Out"}
+        {isPending ? t("visitPanel.checkoutPending") : t("visitPanel.checkoutConfirm")}
       </Button>
     </div>
   );

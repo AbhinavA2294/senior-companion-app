@@ -1,9 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { Calendar, Clock, MapPin, User } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookingStatusBadge } from "./booking-status-badge";
 import { formatDate, formatTime } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import type { BookingWithDetails } from "@/types";
 
 interface BookingCardProps {
@@ -15,6 +18,7 @@ interface BookingCardProps {
 }
 
 export function BookingCard({ booking, basePath, showSeniorName }: BookingCardProps) {
+  const { t } = useTranslation();
   const canCancel = ["draft", "requested", "assigned"].includes(booking.status);
   const start = new Date(`${booking.scheduled_date}T${booking.scheduled_start_time}:00`);
   const isUpcoming = start > new Date() && booking.status !== "cancelled" && booking.status !== "declined";
@@ -25,7 +29,7 @@ export function BookingCard({ booking, basePath, showSeniorName }: BookingCardPr
         <div className="flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-senior-base text-gray-900">
-              {booking.activity_type?.name ?? "Companion Visit"}
+              {booking.activity_type?.name ?? t("bookingCard.companionVisit")}
             </span>
             <BookingStatusBadge status={booking.status} />
           </div>
@@ -38,7 +42,7 @@ export function BookingCard({ booking, basePath, showSeniorName }: BookingCardPr
         </div>
         {isUpcoming && (
           <span className="flex-shrink-0 text-xs font-medium text-sage-600 bg-sage-50 px-2 py-1 rounded-full">
-            Upcoming
+            {t("bookingCard.upcoming")}
           </span>
         )}
       </CardHeader>
@@ -50,8 +54,8 @@ export function BookingCard({ booking, basePath, showSeniorName }: BookingCardPr
         </div>
         <div className="flex items-center gap-2 text-senior-sm text-gray-600">
           <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
-          {formatTime(booking.scheduled_start_time)} &mdash; {booking.duration_hours} hour
-          {booking.duration_hours !== 1 ? "s" : ""}
+          {formatTime(booking.scheduled_start_time)} &mdash; {booking.duration_hours}{" "}
+          {booking.duration_hours !== 1 ? t("common.hours") : t("common.hour")}
         </div>
         {booking.location_description && (
           <div className="flex items-center gap-2 text-senior-sm text-gray-600">
@@ -62,11 +66,11 @@ export function BookingCard({ booking, basePath, showSeniorName }: BookingCardPr
 
         <div className="flex items-center gap-2 pt-2">
           <Button variant="outline" size="sm" asChild>
-            <Link href={`${basePath}/${booking.id}`}>View details</Link>
+            <Link href={`${basePath}/${booking.id}`}>{t("bookingCard.viewDetails")}</Link>
           </Button>
           {canCancel && start > new Date() && (
             <Button variant="ghost" size="sm" asChild>
-              <Link href={`${basePath}/${booking.id}?action=cancel`}>Cancel</Link>
+              <Link href={`${basePath}/${booking.id}?action=cancel`}>{t("bookingCard.cancel")}</Link>
             </Button>
           )}
         </div>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { BookingCard } from "@/components/bookings/booking-card";
 import { Calendar, Plus } from "lucide-react";
 import type { BookingWithDetails } from "@/types";
+import { getServerTranslation } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "My Bookings" };
 
@@ -61,31 +62,28 @@ export default async function FamilyBookingsPage({ searchParams }: Props) {
 
   const upcoming = (upcomingRaw ?? []) as unknown as BookingWithDetails[];
   const past = (pastRaw ?? []) as unknown as BookingWithDetails[];
-
   const displayList = tab === "past" ? past : upcoming;
+  const { t } = getServerTranslation();
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-senior-3xl font-bold text-gray-900">Bookings</h1>
-          <p className="text-senior-lg text-gray-500 mt-1">
-            Manage companion visits for your loved ones.
-          </p>
+          <h1 className="font-display text-senior-3xl font-bold text-gray-900">{t("familyBookings.listTitle")}</h1>
+          <p className="text-senior-lg text-gray-500 mt-1">{t("familyBookings.listSubtitle")}</p>
         </div>
         <Button asChild>
           <Link href="/family/bookings/new">
             <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-            New Booking
+            {t("familyBookings.newBooking")}
           </Link>
         </Button>
       </div>
 
-      {/* Tab bar */}
       <div className="flex gap-1 border-b border-gray-200" role="tablist">
         {[
-          { key: "upcoming", label: `Upcoming (${upcoming.length})` },
-          { key: "past",     label: `Past (${past.length})` },
+          { key: "upcoming", label: t("familyBookings.tabUpcoming").replace("{count}", String(upcoming.length)) },
+          { key: "past",     label: t("familyBookings.tabPast").replace("{count}", String(past.length)) },
         ].map(({ key, label }) => (
           <Link
             key={key}
@@ -103,22 +101,21 @@ export default async function FamilyBookingsPage({ searchParams }: Props) {
         ))}
       </div>
 
-      {/* Booking list */}
       {displayList.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <Calendar className="h-16 w-16 text-gray-200 mb-5" aria-hidden="true" />
           <h2 className="text-senior-xl font-semibold text-gray-500 mb-2">
-            No {tab} bookings
+            {tab === "past" ? t("familyBookings.noPast") : t("familyBookings.noUpcoming")}
           </h2>
           {tab === "upcoming" && (
             <>
               <p className="text-senior-base text-gray-400 mb-8 max-w-sm">
-                Schedule a companion visit for one of your seniors.
+                {t("familyBookings.schedulePrompt")}
               </p>
               <Button asChild size="lg">
                 <Link href="/family/bookings/new">
                   <Plus className="mr-2 h-5 w-5" aria-hidden="true" />
-                  Book a visit
+                  {t("familyBookings.bookVisit")}
                 </Link>
               </Button>
             </>

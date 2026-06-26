@@ -10,27 +10,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { LanguageSelector } from "@/components/i18n/language-selector";
+import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { RegisterSchema, type RegisterFormData } from "@/lib/validations/auth";
 import { getDashboardPath } from "@/lib/utils";
 import type { UserRole } from "@/types";
 
-const roleOptions = [
-  { value: "senior" as const, label: "Senior", description: "I want to book a companion for myself", icon: User },
-  { value: "family" as const, label: "Family Member", description: "I want to book a companion for a loved one", icon: Users },
-  { value: "companion" as const, label: "Companion", description: "I want to provide companionship to seniors", icon: UserCheck },
-];
-
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t, locale } = useTranslation();
   const defaultRole = (searchParams.get("role") ?? "senior") as "senior" | "family" | "companion";
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState(defaultRole);
+
+  const roleOptions = [
+    { value: "senior" as const, label: t("auth.register.roleSenior"), description: t("auth.register.roleSeniorDesc"), icon: User },
+    { value: "family" as const, label: t("auth.register.roleFamily"), description: t("auth.register.roleFamilyDesc"), icon: Users },
+    { value: "companion" as const, label: t("auth.register.roleCompanion"), description: t("auth.register.roleCompanionDesc"), icon: UserCheck },
+  ];
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(RegisterSchema),
@@ -59,11 +62,10 @@ function RegisterForm() {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: authData.user.id, role: data.role, first_name: data.firstName, last_name: data.lastName, phone: data.phone || null }),
+        body: JSON.stringify({ user_id: authData.user.id, role: data.role, first_name: data.firstName, last_name: data.lastName, phone: data.phone || null, ui_language: locale }),
       });
-      if (!res.ok) { setServerError("Account created but profile setup failed. Please contact support."); setIsLoading(false); return; }
+      if (!res.ok) { setServerError(t("auth.register.profileError")); setIsLoading(false); return; }
       router.push(getDashboardPath(data.role as UserRole));
-      router.refresh();
     }
   };
 
@@ -75,8 +77,13 @@ function RegisterForm() {
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-sage-100 mb-4">
               <Heart className="h-7 w-7 text-sage-600" />
             </div>
-            <h1 className="font-display text-senior-3xl font-bold text-gray-900 mb-2">Create your account</h1>
-            <p className="text-senior-base text-gray-500">Join Senior Companion in a few easy steps</p>
+            <h1 className="font-display text-senior-3xl font-bold text-gray-900 mb-2">
+              {t("auth.register.title")}
+            </h1>
+            <p className="text-senior-base text-gray-500">{t("auth.register.subtitle")}</p>
+          </div>
+          <div className="flex justify-end mb-2 -mt-2">
+            <LanguageSelector />
           </div>
           {serverError && (
             <Alert variant="destructive" className="mb-6">
@@ -86,7 +93,9 @@ function RegisterForm() {
           )}
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
             <fieldset>
-              <legend className="block text-senior-base font-semibold text-gray-900 mb-3">I am joining as a…</legend>
+              <legend className="block text-senior-base font-semibold text-gray-900 mb-3">
+                {t("auth.register.roleHeading")}
+              </legend>
               <div className="grid grid-cols-1 gap-3">
                 {roleOptions.map((option) => {
                   const Icon = option.icon;
@@ -110,40 +119,43 @@ function RegisterForm() {
             </fieldset>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First name</Label>
-                <Input id="firstName" type="text" placeholder="Jane" {...register("firstName")} />
+                <Label htmlFor="firstName">{t("auth.register.firstName")}</Label>
+                <Input id="firstName" type="text" placeholder={t("auth.register.firstNamePlaceholder")} {...register("firstName")} />
                 {errors.firstName && <p className="text-sm text-red-600">{errors.firstName.message}</p>}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last name</Label>
-                <Input id="lastName" type="text" placeholder="Smith" {...register("lastName")} />
+                <Label htmlFor="lastName">{t("auth.register.lastName")}</Label>
+                <Input id="lastName" type="text" placeholder={t("auth.register.lastNamePlaceholder")} {...register("lastName")} />
                 {errors.lastName && <p className="text-sm text-red-600">{errors.lastName.message}</p>}
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
-              <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
+              <Label htmlFor="email">{t("auth.register.email")}</Label>
+              <Input id="email" type="email" placeholder={t("auth.register.emailPlaceholder")} {...register("email")} />
               {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone number <span className="text-gray-400 font-normal">(optional)</span></Label>
-              <Input id="phone" type="tel" placeholder="+1 555 000 0000" {...register("phone")} />
+              <Label htmlFor="phone">
+                {t("auth.register.phone")}{" "}
+                <span className="text-gray-400 font-normal">{t("auth.register.phoneOptional")}</span>
+              </Label>
+              <Input id="phone" type="tel" placeholder={t("auth.register.phonePlaceholder")} {...register("phone")} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Create a password</Label>
+              <Label htmlFor="password">{t("auth.register.password")}</Label>
               <div className="relative">
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="At least 8 characters" className="pr-12" {...register("password")} />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder={t("auth.register.passwordPlaceholder")} className="pr-12" {...register("password")} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-gray-400">
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              <p className="text-sm text-gray-500">Must be at least 8 characters with one uppercase letter and one number.</p>
+              <p className="text-sm text-gray-500">{t("auth.register.passwordHint")}</p>
               {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Label htmlFor="confirmPassword">{t("auth.register.confirmPassword")}</Label>
               <div className="relative">
-                <Input id="confirmPassword" type={showConfirm ? "text" : "password"} placeholder="Re-enter your password" className="pr-12" {...register("confirmPassword")} />
+                <Input id="confirmPassword" type={showConfirm ? "text" : "password"} placeholder={t("auth.register.confirmPlaceholder")} className="pr-12" {...register("confirmPassword")} />
                 <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-gray-400">
                   {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -153,17 +165,25 @@ function RegisterForm() {
             <div className="flex items-start gap-3">
               <input id="agreeToTerms" type="checkbox" className="h-5 w-5 mt-0.5 rounded border-2 border-gray-300" {...register("agreeToTerms")} />
               <Label htmlFor="agreeToTerms" className="font-normal text-gray-600 cursor-pointer">
-                I agree to the <Link href="/terms" className="text-sage-600 hover:underline font-semibold">Terms of Service</Link> and <Link href="/privacy" className="text-sage-600 hover:underline font-semibold">Privacy Policy</Link>. I understand that Senior Companion provides non-medical companionship only.
+                {t("auth.register.agreePrefix")}{" "}
+                <Link href="/terms" className="text-sage-600 hover:underline font-semibold">{t("auth.register.termsLink")}</Link>
+                {" "}{t("auth.register.agreeMid")}{" "}
+                <Link href="/privacy" className="text-sage-600 hover:underline font-semibold">{t("auth.register.privacyLink")}</Link>
+                {t("auth.register.agreeSuffix")}
               </Label>
             </div>
             {errors.agreeToTerms && <p className="text-sm text-red-600">{errors.agreeToTerms.message}</p>}
             <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
-              {isLoading ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Creating account…</> : "Create my account"}
+              {isLoading ? (
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin" />{t("auth.register.submitting")}</>
+              ) : (
+                t("auth.register.submit")
+              )}
             </Button>
           </form>
           <p className="mt-6 text-center text-senior-base text-gray-500">
-            Already have an account?{" "}
-            <Link href="/login" className="text-sage-600 font-semibold hover:underline">Sign in</Link>
+            {t("auth.register.haveAccount")}{" "}
+            <Link href="/login" className="text-sage-600 font-semibold hover:underline">{t("auth.register.signIn")}</Link>
           </p>
         </div>
       </div>

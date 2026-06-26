@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import type { Profile, SeniorProfile, ActivityType } from "@/types";
+import { getServerTranslation } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Book a Visit" };
 
@@ -40,37 +41,38 @@ export default async function NewSeniorBookingPage() {
   const activityTypes = (activityTypesRaw ?? []) as unknown as ActivityType[];
 
   const seniors = [{ profile, seniorProfile: seniorDetail }];
+  const { t } = getServerTranslation();
 
   return (
     <div className="max-w-2xl">
       <div className="mb-8">
         <Link href="/senior/bookings" className="text-sm text-sage-600 hover:underline mb-2 inline-block">
-          ← Back to my visits
+          {t("bookingPage.senior.backLink")}
         </Link>
-        <h1 className="font-display text-senior-3xl font-bold text-gray-900">Book a Visit</h1>
+        <h1 className="font-display text-senior-3xl font-bold text-gray-900">{t("bookingPage.senior.title")}</h1>
         <p className="text-senior-lg text-gray-500 mt-1">
-          Schedule a companion visit in a few simple steps.
+          {t("bookingPage.senior.subtitle")}
         </p>
       </div>
 
       <Alert variant="info" className="mb-6">
         <AlertTriangle className="h-4 w-4" aria-hidden="true" />
         <p className="text-sm">
-          Need help? Call us at <strong>1-800-555-2273</strong> and we will help you book over the phone.
+          {t("bookingPage.senior.helpText").replace("{phone}", "1-800-555-2273")}
         </p>
       </Alert>
 
       <div className="mb-4 flex items-center gap-3 rounded-xl border border-sage-100 bg-sage-50 px-4 py-3">
         <span className="text-lg">🎙️</span>
         <div className="flex-1">
-          <p className="text-sm font-medium text-sage-800">Prefer to describe your request in your own words?</p>
-          <p className="text-xs text-sage-600">Try voice-assisted booking — we'll extract the details for you.</p>
+          <p className="text-sm font-medium text-sage-800">{t("bookingPage.voicePromoTitle")}</p>
+          <p className="text-xs text-sage-600">{t("bookingPage.voicePromoSubtitle")}</p>
         </div>
         <Link
           href="/senior/bookings/new/voice"
           className="rounded-lg border border-sage-300 bg-white px-3 py-1.5 text-xs font-semibold text-sage-700 hover:bg-sage-50 whitespace-nowrap"
         >
-          Try it →
+          {t("bookingPage.voicePromoLink")}
         </Link>
       </div>
 

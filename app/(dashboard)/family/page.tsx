@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getServerTranslation } from "@/lib/i18n/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SeniorCard } from "@/components/seniors/senior-card";
@@ -23,11 +24,10 @@ export default async function FamilyDashboardPage() {
     .from("profiles")
     .select("*")
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
 
-  if (profile?.role !== "family") redirect("/login");
+  if (!profile || profile.role !== "family") redirect("/login");
 
-  // ── Fetch linked seniors ────────────────────────────────────
   const { data: relationships } = await supabase
     .from("family_senior_relationships")
     .select("senior_profile_id, relationship_label")
@@ -35,7 +35,6 @@ export default async function FamilyDashboardPage() {
 
   const seniorIds = relationships?.map((r) => r.senior_profile_id) ?? [];
 
-  // Also fetch managed seniors (created by this family member)
   const { data: managedProfiles } = await supabase
     .from("profiles")
     .select("id")
@@ -65,7 +64,6 @@ export default async function FamilyDashboardPage() {
     }));
   }
 
-  // ── Fetch upcoming bookings (next 30 days) ──────────────────
   const today = new Date().toISOString().split("T")[0];
   const { data: upcomingBookingsRaw } = await supabase
     .from("bookings")
@@ -82,7 +80,6 @@ export default async function FamilyDashboardPage() {
 
   const upcomingBookings = (upcomingBookingsRaw ?? []) as unknown as BookingWithDetails[];
 
-  // ── Fetch recent past bookings ──────────────────────────────
   const { data: pastBookingsRaw } = await supabase
     .from("bookings")
     .select(`
@@ -96,38 +93,39 @@ export default async function FamilyDashboardPage() {
     .limit(3);
 
   const pastBookings = (pastBookingsRaw ?? []) as unknown as BookingWithDetails[];
-
   const totalBookings = (upcomingBookings?.length ?? 0) + (pastBookings?.length ?? 0);
+
+  const { t } = getServerTranslation();
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="font-display text-senior-3xl font-bold text-gray-900 mb-2">
-          Family Dashboard
+          {t("family.dashboard.pageTitle")}
         </h1>
         <p className="text-senior-lg text-gray-500">
-          Manage companion visits for your loved ones — from anywhere.
+          {t("family.dashboard.subtitle")}
         </p>
       </div>
 
       {/* Quick actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="bg-gradient-to-br from-sage-600 to-sage-700 rounded-2xl p-6 text-white">
-          <h2 className="font-bold text-senior-xl mb-2">Book a companion</h2>
+          <h2 className="font-bold text-senior-xl mb-2">{t("family.dashboard.bookCardTitle")}</h2>
           <p className="text-sage-100 text-senior-sm mb-5">
-            Schedule a visit — a doctor&apos;s appointment, walk, errand, or just some company.
+            {t("family.dashboard.bookCardDesc")}
           </p>
           <Button size="default" variant="warm" asChild>
             <Link href="/family/bookings/new">
               <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-              New Booking
+              {t("family.dashboard.newBooking")}
             </Link>
           </Button>
         </div>
         <div className="bg-gradient-to-br from-warm-500 to-warm-600 rounded-2xl p-6 text-white">
-          <h2 className="font-bold text-senior-xl mb-2">Add a senior</h2>
+          <h2 className="font-bold text-senior-xl mb-2">{t("family.dashboard.addSeniorCardTitle")}</h2>
           <p className="text-warm-100 text-senior-sm mb-5">
-            Add a loved one to manage companion visits on their behalf.
+            {t("family.dashboard.addSeniorCardDesc")}
           </p>
           <Button
             size="default"
@@ -137,7 +135,7 @@ export default async function FamilyDashboardPage() {
           >
             <Link href="/family/seniors/add">
               <Users className="mr-2 h-4 w-4" aria-hidden="true" />
-              Add Senior
+              {t("family.dashboard.addSeniorButton")}
             </Link>
           </Button>
         </div>
@@ -146,9 +144,9 @@ export default async function FamilyDashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         {[
-          { label: "Seniors I support", value: String(allSeniorIds.length), icon: Users },
-          { label: "Upcoming visits", value: String(upcomingBookings.length), icon: Calendar },
-          { label: "Total visits arranged", value: String(totalBookings), icon: Heart },
+          { label: t("family.dashboard.statSeniors"), value: String(allSeniorIds.length), icon: Users },
+          { label: t("family.dashboard.statUpcoming"), value: String(upcomingBookings.length), icon: Calendar },
+          { label: t("family.dashboard.statTotal"),   value: String(totalBookings), icon: Heart },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
@@ -171,10 +169,10 @@ export default async function FamilyDashboardPage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-senior-xl font-semibold text-gray-900">
-            Seniors I Support
+            {t("family.dashboard.seniorsSection")}
           </h2>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/family/seniors">View all</Link>
+            <Link href="/family/seniors">{t("family.dashboard.viewAll")}</Link>
           </Button>
         </div>
 
@@ -182,12 +180,12 @@ export default async function FamilyDashboardPage() {
           <Card className="border-0 shadow-sm">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
               <Users className="h-12 w-12 text-gray-300 mb-4" aria-hidden="true" />
-              <p className="text-senior-lg font-medium text-gray-500 mb-2">No seniors linked yet</p>
+              <p className="text-senior-lg font-medium text-gray-500 mb-2">{t("family.dashboard.noSeniorsTitle")}</p>
               <p className="text-senior-base text-gray-400 mb-6 max-w-sm">
-                Add a loved one to start arranging companionship on their behalf.
+                {t("family.dashboard.noSeniorsDesc")}
               </p>
               <Button asChild>
-                <Link href="/family/seniors/add">Add a senior</Link>
+                <Link href="/family/seniors/add">{t("family.dashboard.addSeniorLink")}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -209,10 +207,10 @@ export default async function FamilyDashboardPage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-senior-xl font-semibold text-gray-900">
-            Upcoming Bookings
+            {t("family.dashboard.upcomingSection")}
           </h2>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/family/bookings">View all</Link>
+            <Link href="/family/bookings">{t("family.dashboard.viewAll")}</Link>
           </Button>
         </div>
 
@@ -220,11 +218,11 @@ export default async function FamilyDashboardPage() {
           <Card className="border-0 shadow-sm">
             <CardContent className="flex flex-col items-center justify-center py-10 text-center">
               <Calendar className="h-10 w-10 text-gray-300 mb-3" aria-hidden="true" />
-              <p className="text-senior-base font-medium text-gray-500 mb-4">No upcoming bookings</p>
+              <p className="text-senior-base font-medium text-gray-500 mb-4">{t("family.dashboard.noUpcoming")}</p>
               <Button asChild>
                 <Link href="/family/bookings/new">
                   <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-                  Book a visit
+                  {t("family.dashboard.bookVisit")}
                 </Link>
               </Button>
             </CardContent>
@@ -248,10 +246,10 @@ export default async function FamilyDashboardPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-senior-xl font-semibold text-gray-900">
-              Past Bookings
+              {t("family.dashboard.pastSection")}
             </h2>
             <Button variant="outline" size="sm" asChild>
-              <Link href="/family/bookings?tab=past">View all</Link>
+              <Link href="/family/bookings?tab=past">{t("family.dashboard.viewAll")}</Link>
             </Button>
           </div>
           <div className="space-y-4">
@@ -272,19 +270,19 @@ export default async function FamilyDashboardPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sage-800">
             <Phone className="h-5 w-5" aria-hidden="true" />
-            Support
+            {t("family.dashboard.supportTitle")}
           </CardTitle>
-          <CardDescription>Need help? Our support team is here for you.</CardDescription>
+          <CardDescription>{t("family.dashboard.supportSubtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-senior-sm text-gray-600 mb-3">
-            For questions about a booking or your account, please contact support:
+            {t("family.dashboard.supportMessage")}
           </p>
           <p className="font-semibold text-sage-700 text-senior-base">
-            1-800-555-CARE (2273)
+            {t("family.dashboard.supportPhone")}
           </p>
           <p className="text-sm text-gray-500 mt-1">
-            Available Monday–Friday, 8 AM–6 PM local time
+            {t("family.dashboard.supportAvailable")}
           </p>
         </CardContent>
       </Card>

@@ -4,16 +4,19 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LanguageSelector } from "@/components/i18n/language-selector";
+import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-
-const publicNavItems = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Our Services", href: "/services" },
-];
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { t } = useTranslation();
+
+  const publicNavItems = [
+    { label: t("navbar.home"),     href: "/" },
+    { label: t("navbar.about"),    href: "/about" },
+    { label: t("navbar.services"), href: "/services" },
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-sage-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
@@ -22,7 +25,7 @@ export function Navbar() {
         <Link
           href="/"
           className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-500 rounded-lg"
-          aria-label="Senior Companion — go to home page"
+          aria-label={t("navbar.logoAlt")}
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sage-500">
             <Heart className="h-5 w-5 text-white" aria-hidden="true" />
@@ -48,11 +51,12 @@ export function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
+          <LanguageSelector compact />
           <Button variant="ghost" size="default" asChild>
-            <Link href="/login">Sign In</Link>
+            <Link href="/login">{t("navbar.signIn")}</Link>
           </Button>
           <Button variant="default" size="default" asChild>
-            <Link href="/register">Get Started</Link>
+            <Link href="/register">{t("navbar.getStarted")}</Link>
           </Button>
         </div>
 
@@ -62,7 +66,7 @@ export function Navbar() {
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-expanded={mobileOpen}
           aria-controls="mobile-menu"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-label={mobileOpen ? t("navbar.closeMenu") : t("navbar.openMenu")}
         >
           {mobileOpen ? (
             <X className="h-6 w-6" aria-hidden="true" />
@@ -94,14 +98,15 @@ export function Navbar() {
             </Link>
           ))}
           <div className="flex flex-col gap-3 pt-4 mt-2 border-t border-sage-100">
+            <LanguageSelector />
             <Button variant="outline" size="lg" asChild className="w-full">
               <Link href="/login" onClick={() => setMobileOpen(false)}>
-                Sign In
+                {t("navbar.signIn")}
               </Link>
             </Button>
             <Button size="lg" asChild className="w-full">
               <Link href="/register" onClick={() => setMobileOpen(false)}>
-                Get Started
+                {t("navbar.getStarted")}
               </Link>
             </Button>
           </div>

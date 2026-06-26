@@ -1,63 +1,57 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import en from "./translations/en.json";
-import es from "./translations/es.json";
-import hi from "./translations/hi.json";
-import ta from "./translations/ta.json";
+import { useRouter } from "next/navigation";
+import {
+  LOCALE_LABELS,
+  SUPPORTED_LOCALES,
+  TRANSLATIONS,
+  getNestedValue,
+} from "./translations-map";
 
-export type SupportedLocale = "en" | "es" | "hi" | "ta";
-
-const LOCALE_LABELS: Record<SupportedLocale, string> = {
-  en: "English",
-  es: "Español",
-  hi: "हिन्दी",
-  ta: "தமிழ்",
-};
-
-const TRANSLATIONS: Record<SupportedLocale, Record<string, unknown>> = { en, es, hi, ta };
+export type { SupportedLocale } from "./translations-map";
 
 const STORAGE_KEY = "sc_ui_locale";
-
-function getNestedValue(obj: Record<string, unknown>, key: string): string {
-  const parts = key.split(".");
-  let current: unknown = obj;
-  for (const part of parts) {
-    if (current == null || typeof current !== "object") return key;
-    current = (current as Record<string, unknown>)[part];
-  }
-  return typeof current === "string" ? current : key;
-}
+const COOKIE_KEY  = "sc_ui_locale";
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 interface LanguageContextValue {
-  locale: SupportedLocale;
-  setLocale: (locale: SupportedLocale) => void;
+  locale: string;
+  setLocale: (locale: string) => void;
   t: (key: string) => string;
-  localeLabels: Record<SupportedLocale, string>;
-  supportedLocales: SupportedLocale[];
+  localeLabels: Record<string, string>;
+  supportedLocales: string[];
 }
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<SupportedLocale>("en");
+  const router = useRouter();
+  const [locale, setLocaleState] = useState("en");
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as SupportedLocale | null;
+    const stored = localStorage.getItem(STORAGE_KEY);
     if (stored && stored in TRANSLATIONS) {
       setLocaleState(stored);
+      document.cookie = `${COOKIE_KEY}=${stored}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
     }
   }, []);
 
-  const setLocale = useCallback((next: SupportedLocale) => {
-    setLocaleState(next);
-    localStorage.setItem(STORAGE_KEY, next);
-    document.documentElement.lang = next;
-  }, []);
+  const setLocale = useCallback(
+    (next: string) => {
+      if (!(next in TRANSLATIONS)) return;
+      setLocaleState(next);
+      localStorage.setItem(STORAGE_KEY, next);
+      document.cookie = `${COOKIE_KEY}=${next}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+      document.documentElement.lang = next;
+      router.refresh();
+    },
+    [router],
+  );
 
   const t = useCallback(
     (key: string) => getNestedValue(TRANSLATIONS[locale] as Record<string, unknown>, key),
-    [locale]
+    [locale],
   );
 
   return (
@@ -67,7 +61,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         setLocale,
         t,
         localeLabels: LOCALE_LABELS,
-        supportedLocales: ["en", "es", "hi", "ta"],
+        supportedLocales: SUPPORTED_LOCALES,
       }}
     >
       {children}

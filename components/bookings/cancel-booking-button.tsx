@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cancelBooking } from "@/lib/actions/bookings";
 import { X } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface CancelBookingButtonProps {
   bookingId: string;
@@ -12,6 +13,7 @@ interface CancelBookingButtonProps {
 }
 
 export function CancelBookingButton({ bookingId, redirectPath }: CancelBookingButtonProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,7 @@ export function CancelBookingButton({ bookingId, redirectPath }: CancelBookingBu
   if (confirming) {
     return (
       <div className="flex flex-col items-end gap-2">
-        <p className="text-sm text-gray-600">Are you sure you want to cancel this booking?</p>
+        <p className="text-sm text-gray-600">{t("cancelBooking.confirm")}</p>
         <div className="flex gap-2">
           <Button
             variant="ghost"
@@ -42,7 +44,7 @@ export function CancelBookingButton({ bookingId, redirectPath }: CancelBookingBu
             onClick={() => setConfirming(false)}
             disabled={isPending}
           >
-            Keep it
+            {t("cancelBooking.keep")}
           </Button>
           <Button
             variant="destructive"
@@ -50,7 +52,7 @@ export function CancelBookingButton({ bookingId, redirectPath }: CancelBookingBu
             onClick={handleCancel}
             disabled={isPending}
           >
-            {isPending ? "Cancelling…" : "Yes, cancel"}
+            {isPending ? t("cancelBooking.cancelling") : t("cancelBooking.yes")}
           </Button>
         </div>
         {error && (
@@ -68,7 +70,7 @@ export function CancelBookingButton({ bookingId, redirectPath }: CancelBookingBu
       onClick={() => setConfirming(true)}
     >
       <X className="mr-1.5 h-4 w-4" aria-hidden="true" />
-      Cancel booking
+      {t("cancelBooking.button")}
     </Button>
   );
 }

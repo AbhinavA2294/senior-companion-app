@@ -21,7 +21,14 @@
       "Bash(Format-Hex)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(python3 *)",
+      "Bash(npx next *)",
+      "Bash(npx jest *)",
+      "PowerShell(& \"C:\\\\Users\\\\abhin\\\\Downloads\\\\senior-companion\\\\scripts\\\\add-translations.ps1\")",
+      "PowerShell(& \"C:\\\\Users\\\\abhin\\\\Downloads\\\\senior-companion\\\\scripts\\\\add-translations2.ps1\")",
+      "Bash(awk '/CREATE TYPE notification_channel/,/\\\\\\);/' supabase/migrations/20240101000000_initial_schema.sql)",
+      "Bash(awk '/CREATE TYPE notification_status/,/\\\\\\);/' supabase/migrations/20240101000000_initial_schema.sql)"
     ]
   }
 }

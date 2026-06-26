@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { BookingSchema, type BookingFormData } from "@/lib/validations/booking";
 import { cancelPaymentForBooking } from "@/lib/actions/payments";
+import { loadPilotSettings } from "@/lib/pilot/settings";
+import { validateBookingAgainstPilotSettings } from "@/lib/pilot/validation";
 
 export type ActionResult =
   | { success: true; bookingId?: string }
@@ -60,6 +62,25 @@ export async function createBooking(raw: BookingFormData): Promise<ActionResult>
     }
   }
 
+  // Enforce pilot service-hours and duration limits from admin-configurable settings
+  const pilotSettings = await loadPilotSettings();
+  const pilotErr = validateBookingAgainstPilotSettings(
+    data.scheduled_date,
+    data.scheduled_start_time,
+    data.duration_hours,
+    pilotSettings
+  );
+  if (pilotErr) return { success: false, error: pilotErr };
+
+  // Determine whether this is the senior's first booking
+  const adminClient = createAdminClient();
+  const { count: priorBookingCount } = await adminClient
+    .from("bookings")
+    .select("id", { count: "exact", head: true })
+    .eq("senior_profile_id", data.senior_profile_id)
+    .not("status", "in", '("cancelled","declined")');
+  const isFirstBooking = (priorBookingCount ?? 0) === 0;
+
   const { data: booking, error: insertErr } = await supabase
     .from("bookings")
     .insert({
@@ -75,6 +96,7 @@ export async function createBooking(raw: BookingFormData): Promise<ActionResult>
       transportation_mode: data.transportation_mode ?? null,
       special_notes: data.special_notes || null,
       disclaimer_acknowledged: data.disclaimer_acknowledged,
+      is_first_booking: isFirstBooking,
     })
     .select("id")
     .single();

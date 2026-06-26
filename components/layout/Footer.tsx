@@ -1,17 +1,43 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { Heart } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export function Footer() {
+  const { t } = useTranslation();
+
+  const serviceLinks = [
+    { label: t("footer.doctorChaperone"),    href: "/services" },
+    { label: t("footer.walksParks"),         href: "/services" },
+    { label: t("footer.errands"),            href: "/services" },
+    { label: t("footer.socialCompanionship"),href: "/services" },
+    { label: t("footer.allServices"),        href: "/services" },
+  ];
+
+  const companyLinks = [
+    { label: t("footer.aboutUs"),           href: "/about" },
+    { label: t("footer.becomeCompanion"),   href: "/register" },
+    { label: t("footer.trustSafety"),       href: "/services#safety" },
+    { label: t("footer.serviceBoundaries"), href: "/services#boundaries" },
+  ];
+
+  const legalLinks = [
+    { label: t("footer.faq"),             href: "/faq" },
+    { label: t("footer.contactSupport"),  href: "/support" },
+    { label: t("footer.privacyPolicy"),   href: "/privacy" },
+    { label: t("footer.termsOfService"),  href: "/terms" },
+    { label: t("footer.codeOfConduct"),   href: "/code-of-conduct" },
+  ];
+
   return (
     <footer className="bg-sage-900 text-white">
       {/* Disclaimer banner */}
       <div className="bg-warm-600 py-4">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6">
           <p className="text-center text-sm sm:text-senior-sm font-medium text-white leading-relaxed">
-            <strong>Important:</strong> Senior Companion provides non-medical companionship and
-            chaperone services only. Companions do not provide medical care, personal care,
-            emergency transportation, or financial services.
+            <strong>{t("footer.important")}</strong> {t("footer.disclaimer")}
           </p>
         </div>
       </div>
@@ -27,23 +53,16 @@ export function Footer() {
               <span className="font-display text-lg font-bold">Senior Companion</span>
             </div>
             <p className="text-sage-300 text-sm leading-relaxed max-w-xs">
-              Trusted, verified companionship for seniors and their families. Because no one
-              should face life&apos;s moments alone.
+              {t("footer.tagline")}
             </p>
           </div>
 
           {/* Services */}
           <div>
-            <h3 className="font-bold text-white mb-4 text-senior-base">Services</h3>
+            <h3 className="font-bold text-white mb-4 text-senior-base">{t("footer.servicesHeading")}</h3>
             <ul className="space-y-2">
-              {[
-                { label: "Doctor Appointment Chaperone", href: "/services" },
-                { label: "Walks & Park Visits", href: "/services" },
-                { label: "Errands & Shopping", href: "/services" },
-                { label: "Social Companionship", href: "/services" },
-                { label: "All Services", href: "/services" },
-              ].map((item) => (
-                <li key={item.label}>
+              {serviceLinks.map((item) => (
+                <li key={item.href + item.label}>
                   <Link
                     href={item.href}
                     className="text-sage-300 hover:text-white text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sage-400 rounded"
@@ -57,15 +76,10 @@ export function Footer() {
 
           {/* Company */}
           <div>
-            <h3 className="font-bold text-white mb-4 text-senior-base">Company</h3>
+            <h3 className="font-bold text-white mb-4 text-senior-base">{t("footer.companyHeading")}</h3>
             <ul className="space-y-2">
-              {[
-                { label: "About Us", href: "/about" },
-                { label: "Become a Companion", href: "/register" },
-                { label: "Trust & Safety", href: "/services#safety" },
-                { label: "Service Boundaries", href: "/services#boundaries" },
-              ].map((item) => (
-                <li key={item.label}>
+              {companyLinks.map((item) => (
+                <li key={item.href + item.label}>
                   <Link
                     href={item.href}
                     className="text-sage-300 hover:text-white text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sage-400 rounded"
@@ -77,16 +91,12 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Support & Legal */}
           <div>
-            <h3 className="font-bold text-white mb-4 text-senior-base">Legal</h3>
+            <h3 className="font-bold text-white mb-4 text-senior-base">{t("footer.supportLegalHeading")}</h3>
             <ul className="space-y-2">
-              {[
-                { label: "Privacy Policy", href: "/privacy" },
-                { label: "Terms of Service", href: "/terms" },
-                { label: "Contact Support", href: "/contact" },
-              ].map((item) => (
-                <li key={item.label}>
+              {legalLinks.map((item) => (
+                <li key={item.href + item.label}>
                   <Link
                     href={item.href}
                     className="text-sage-300 hover:text-white text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sage-400 rounded"
@@ -101,11 +111,10 @@ export function Footer() {
 
         <div className="mt-10 pt-8 border-t border-sage-700 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sage-400 text-sm">
-            &copy; {new Date().getFullYear()} Senior Companion. All rights reserved.
+            {t("footer.copyright").replace("{year}", String(new Date().getFullYear()))}
           </p>
           <p className="text-sage-500 text-xs text-center sm:text-right max-w-md">
-            Not a licensed healthcare provider. Not a medical transportation service. For
-            companionship and non-medical chaperone services only.
+            {t("footer.legalNote")}
           </p>
         </div>
       </div>

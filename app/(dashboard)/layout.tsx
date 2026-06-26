@@ -2,7 +2,8 @@ import React from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getRoleLabel, getDashboardPath } from "@/lib/utils";
+import { getServerTranslation } from "@/lib/i18n/server";
+import { getDashboardPath } from "@/lib/utils";
 import type { UserRole } from "@/types";
 import { LanguageSelector } from "@/components/i18n/language-selector";
 import {
@@ -22,48 +23,61 @@ import {
   HelpCircle,
   DollarSign,
   Settings,
+  Rocket,
 } from "lucide-react";
 
 type NavItem = { href: string; label: string; icon: React.ElementType };
 
-function getDashboardNavItems(role: UserRole, basePath: string): NavItem[] {
+function getDashboardNavItems(
+  role: UserRole,
+  basePath: string,
+  t: (key: string) => string,
+): NavItem[] {
   const common: NavItem[] = [
-    { href: basePath, label: "Dashboard", icon: LayoutDashboard },
-    { href: `${basePath}/profile`, label: "My Profile", icon: User },
-    { href: `${basePath}/notifications`, label: "Notifications", icon: Bell },
-    { href: "/settings/accessibility", label: "Accessibility", icon: Settings },
+    { href: basePath,                    label: t("nav.dashboard"),     icon: LayoutDashboard },
+    { href: `${basePath}/profile`,       label: t("nav.myProfile"),     icon: User },
+    { href: `${basePath}/notifications`, label: t("nav.notifications"), icon: Bell },
+    { href: "/settings/accessibility",   label: t("nav.accessibility"), icon: Settings },
   ];
 
   const roleSpecific: Record<UserRole, NavItem[]> = {
     senior: [
-      { href: "/senior/bookings", label: "My Bookings", icon: Calendar },
-      { href: "/senior/bookings/new", label: "Book a Companion", icon: Plus },
-      { href: "/senior/ratings", label: "My Reviews", icon: Star },
+      { href: "/senior/bookings",     label: t("nav.myBookings"),    icon: Calendar },
+      { href: "/senior/bookings/new", label: t("nav.bookCompanion"), icon: Plus },
+      { href: "/senior/ratings",      label: t("nav.myReviews"),     icon: Star },
     ],
     family: [
-      { href: "/family/bookings", label: "Bookings", icon: Calendar },
-      { href: "/family/seniors", label: "My Seniors", icon: Users },
-      { href: "/family/bookings/new", label: "Book a Companion", icon: Plus },
+      { href: "/family/bookings",     label: t("nav.bookings"),      icon: Calendar },
+      { href: "/family/seniors",      label: t("nav.mySeniors"),     icon: Users },
+      { href: "/family/bookings/new", label: t("nav.bookCompanion"), icon: Plus },
     ],
     companion: [
-      { href: "/companion/bookings", label: "Booking Requests", icon: Calendar },
-      { href: "/companion/schedule", label: "Upcoming Visits", icon: ClipboardList },
-      { href: "/companion/availability", label: "Availability", icon: Clock },
-      { href: "/companion/earnings", label: "My Earnings", icon: DollarSign },
-      { href: "/companion/ratings", label: "My Ratings", icon: Star },
-      { href: "/companion/verification", label: "Verification", icon: ShieldCheck },
-      { href: "/companion/support", label: "Support", icon: HelpCircle },
+      { href: "/companion/bookings",      label: t("nav.bookingRequests"), icon: Calendar },
+      { href: "/companion/schedule",      label: t("nav.upcomingVisits"),  icon: ClipboardList },
+      { href: "/companion/availability",  label: t("nav.availability"),    icon: Clock },
+      { href: "/companion/earnings",      label: t("nav.myEarnings"),      icon: DollarSign },
+      { href: "/companion/ratings",       label: t("nav.myRatings"),       icon: Star },
+      { href: "/companion/verification",  label: t("nav.verification"),    icon: ShieldCheck },
+      { href: "/companion/support",       label: t("nav.support"),         icon: HelpCircle },
     ],
     admin: [
-      { href: "/admin/companions", label: "Companions", icon: Users },
-      { href: "/admin/bookings", label: "Bookings", icon: Calendar },
-      { href: "/admin/reports", label: "Incident Reports", icon: ClipboardList },
-      { href: "/admin/activity", label: "Activity", icon: Activity },
+      { href: "/admin/companions", label: t("nav.companions"),      icon: Users },
+      { href: "/admin/bookings",   label: t("nav.bookings"),        icon: Calendar },
+      { href: "/admin/reports",    label: t("nav.incidentReports"), icon: ClipboardList },
+      { href: "/admin/activity",   label: t("nav.activity"),        icon: Activity },
+      { href: "/admin/pilot",      label: t("nav.pilotOps"),        icon: Rocket },
     ],
   };
 
   return [...common, ...(roleSpecific[role] ?? [])];
 }
+
+const ROLE_LABEL_KEYS: Record<UserRole, string> = {
+  senior:    "dashboard.roleSenior",
+  family:    "dashboard.roleFamily",
+  companion: "dashboard.roleCompanion",
+  admin:     "dashboard.roleAdmin",
+};
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
@@ -84,7 +98,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const role = (profile?.role ?? "senior") as UserRole;
   const firstName = profile?.first_name ?? "there";
   const basePath = getDashboardPath(role);
-  const navItems = getDashboardNavItems(role, basePath);
+
+  const { t } = getServerTranslation();
+  const navItems = getDashboardNavItems(role, basePath, t);
+  const roleLabel = t(ROLE_LABEL_KEYS[role]);
+  const greeting = t("dashboard.hello").replace("{name}", firstName);
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-gray-50">
@@ -97,10 +115,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </div>
             <div>
               <span className="font-semibold text-gray-900 text-senior-sm">
-                Hello, {firstName}
+                {greeting}
               </span>
               <span className="ml-2 text-xs bg-sage-100 text-sage-600 px-2 py-0.5 rounded-full font-medium">
-                {getRoleLabel(role)}
+                {roleLabel}
               </span>
             </div>
           </div>
@@ -109,7 +127,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <LanguageSelector compact />
             <button
               className="relative h-10 w-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-500 transition-colors"
-              aria-label="Notifications"
+              aria-label={t("common.notifications")}
             >
               <Bell className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -119,7 +137,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 className="h-10 px-3 flex items-center gap-1.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-500 transition-colors"
               >
                 <LogOut className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:inline">Sign out</span>
+                <span className="hidden sm:inline">{t("common.signOut")}</span>
               </button>
             </form>
           </div>

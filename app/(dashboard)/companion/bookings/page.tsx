@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils";
+import { getServerTranslation } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Booking Requests – Companion" };
 
@@ -29,7 +30,6 @@ export default async function CompanionBookingsPage() {
     .eq("profile_id", profile.id)
     .single();
 
-  // Pending and recent assignments
   const { data: assignments } = await supabase
     .from("booking_assignments")
     .select(`
@@ -53,15 +53,16 @@ export default async function CompanionBookingsPage() {
   const pending = (assignments ?? []).filter((a) => a.status === "pending");
   const recent = (assignments ?? []).filter((a) => a.status !== "pending").slice(0, 5);
   const isApproved = cp?.verification_status === "approved";
+  const { t } = getServerTranslation();
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="font-display text-senior-3xl font-bold text-gray-900 mb-2">
-          Booking Requests
+          {t("companionBookings.listTitle")}
         </h1>
         <p className="text-senior-lg text-gray-500">
-          Respond to booking assignments from our coordination team.
+          {t("companionBookings.listSubtitle")}
         </p>
       </div>
 
@@ -83,7 +84,7 @@ export default async function CompanionBookingsPage() {
           {pending.length === 0 ? (
             <div className="py-10 text-center">
               <Calendar className="h-10 w-10 text-gray-300 mx-auto mb-3" aria-hidden="true" />
-              <p className="text-gray-500 text-senior-base">No pending requests</p>
+              <p className="text-gray-500 text-senior-base">{t("companionBookings.noUpcoming")}</p>
             </div>
           ) : (
             <ul className="divide-y divide-gray-50">
@@ -98,7 +99,7 @@ export default async function CompanionBookingsPage() {
                     >
                       <div className="space-y-1 min-w-0">
                         <p className="font-semibold text-gray-900 truncate">
-                          {b?.activity_type?.name ?? "Companion Visit"}
+                          {b?.activity_type?.name ?? t("bookingCard.companionVisit")}
                         </p>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
                           <span className="flex items-center gap-1">
@@ -116,7 +117,7 @@ export default async function CompanionBookingsPage() {
                           </span>
                         </div>
                       </div>
-                      <Badge variant="warning" className="flex-shrink-0">Pending</Badge>
+                      <Badge variant="warning" className="flex-shrink-0">{t("bookingStatus.requested")}</Badge>
                     </Link>
                   </li>
                 );
@@ -145,7 +146,7 @@ export default async function CompanionBookingsPage() {
                     >
                       <div className="space-y-0.5 min-w-0">
                         <p className="text-sm font-medium text-gray-800 truncate">
-                          {b?.activity_type?.name ?? "Companion Visit"}
+                          {b?.activity_type?.name ?? t("bookingCard.companionVisit")}
                         </p>
                         <p className="text-xs text-gray-400">
                           {b?.scheduled_date ? formatDate(b.scheduled_date) : "—"}

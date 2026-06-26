@@ -1,13 +1,14 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { getServerTranslation } from "@/lib/i18n/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Calendar, Star, Clock, ShieldCheck, AlertTriangle, CheckCircle } from "lucide-react";
-import { formatDate, formatTime } from "@/lib/utils";
+import { Clock, ShieldCheck, AlertTriangle, CheckCircle, Star } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Companion Dashboard" };
 
@@ -16,8 +17,8 @@ export default async function CompanionDashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
-  if (profile?.role !== "companion") redirect("/login");
+  const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
+  if (!profile || profile.role !== "companion") redirect("/login");
 
   const { data: companionProfile } = await supabase.from("companion_profiles").select("id, verification_status").eq("profile_id", profile.id).single();
 
@@ -26,7 +27,6 @@ export default async function CompanionDashboardPage() {
   const isApproved = verificationStatus === "approved";
 
   const admin = createAdminClient();
-  const today = new Date().toISOString().split("T")[0];
 
   const { data: completedBookings } = await admin
     .from("bookings")
@@ -38,20 +38,26 @@ export default async function CompanionDashboardPage() {
 
   const totalHours = (completedBookings ?? []).reduce((acc, b) => acc + ((b.duration_hours as number) ?? 0), 0);
 
+  const { t } = getServerTranslation();
+
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-display text-senior-3xl font-bold text-gray-900 mb-2">Companion Dashboard</h1>
-        <p className="text-senior-lg text-gray-500">Manage your schedule, bookings, and companion profile.</p>
+        <h1 className="font-display text-senior-3xl font-bold text-gray-900 mb-2">
+          {t("companion.dashboard.pageTitle")}
+        </h1>
+        <p className="text-senior-lg text-gray-500">{t("companion.dashboard.subtitle")}</p>
       </div>
 
       {isPending && (
         <Alert variant="warning">
           <AlertTriangle className="h-5 w-5" />
-          <AlertTitle>Verification in progress</AlertTitle>
+          <AlertTitle>{t("companion.dashboard.verificationAlertTitle")}</AlertTitle>
           <AlertDescription>
-            Your companion profile is being reviewed.{" "}
-            <Link href="/companion/verification" className="font-semibold underline">View verification status</Link>
+            {t("companion.dashboard.verificationAlertDesc")}{" "}
+            <Link href="/companion/verification" className="font-semibold underline">
+              {t("companion.dashboard.viewVerificationStatus")}
+            </Link>
           </AlertDescription>
         </Alert>
       )}
@@ -62,22 +68,24 @@ export default async function CompanionDashboardPage() {
             <ShieldCheck className="h-7 w-7 text-sage-600" />
           </div>
           <div>
-            <p className="font-semibold text-gray-900 text-senior-base">Verification status</p>
+            <p className="font-semibold text-gray-900 text-senior-base">
+              {t("companion.dashboard.verificationStatusLabel")}
+            </p>
             <Badge variant={isApproved ? "success" : "warning"} className="mt-1 capitalize">
               {verificationStatus.replace("_", " ")}
             </Badge>
           </div>
         </div>
         <Button variant="outline" size="default" asChild>
-          <Link href="/companion/verification">View details</Link>
+          <Link href="/companion/verification">{t("companion.dashboard.viewDetails")}</Link>
         </Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         {[
-          { label: "Hours completed", value: totalHours > 0 ? String(Math.round(totalHours)) : "0", icon: Clock },
-          { label: "Visits completed", value: String(completedBookings?.length ?? 0), icon: Star },
-          { label: "Status", value: isApproved ? "Active" : "Pending", icon: ShieldCheck },
+          { label: t("companion.dashboard.statHours"),  value: totalHours > 0 ? String(Math.round(totalHours)) : "0", icon: Clock },
+          { label: t("companion.dashboard.statVisits"), value: String(completedBookings?.length ?? 0), icon: Star },
+          { label: t("companion.dashboard.statStatus"), value: isApproved ? t("companion.dashboard.statusActive") : t("companion.dashboard.statusPending"), icon: ShieldCheck },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
@@ -100,30 +108,38 @@ export default async function CompanionDashboardPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-sage-500" />
-            Completed Visits
+            {t("companion.dashboard.completedTitle")}
           </CardTitle>
-          <CardDescription>Your visit history</CardDescription>
+          <CardDescription>{t("companion.dashboard.completedSubtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
           {!completedBookings || completedBookings.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <CheckCircle className="h-10 w-10 text-gray-200 mb-3" />
-              <p className="text-gray-500 text-sm">No completed visits yet</p>
+              <p className="text-gray-500 text-sm">{t("companion.dashboard.noVisits")}</p>
             </div>
           ) : (
             <ul className="divide-y divide-gray-50">
               {completedBookings.map((b) => {
-                const actType = (b.activity_type as any);
+                const actType = (b.activity_type as { name?: string } | null);
                 return (
                   <li key={b.id} className="py-4 space-y-1">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="font-semibold text-gray-900 text-sm">{actType?.name ?? "Companion Visit"}</p>
-                        <p className="text-xs text-gray-500">{b.scheduled_date ? formatDate(b.scheduled_date) : "—"}</p>
+                        <p className="font-semibold text-gray-900 text-sm">
+                          {actType?.name ?? t("companion.dashboard.companionVisit")}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {b.scheduled_date ? formatDate(b.scheduled_date) : "—"}
+                        </p>
                       </div>
-                      <Badge variant="success" className="flex-shrink-0 text-xs">Completed</Badge>
+                      <Badge variant="success" className="flex-shrink-0 text-xs">
+                        {t("companion.dashboard.completedBadge")}
+                      </Badge>
                     </div>
-                    {b.visit_note && <p className="text-xs text-gray-500 italic line-clamp-2">{b.visit_note as string}</p>}
+                    {b.visit_note && (
+                      <p className="text-xs text-gray-500 italic line-clamp-2">{b.visit_note as string}</p>
+                    )}
                   </li>
                 );
               })}

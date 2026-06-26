@@ -1,144 +1,146 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { BookingStatusBadge } from "@/components/bookings/booking-status-badge";
-import { CancelBookingButton } from "@/components/bookings/cancel-booking-button";
-import { Calendar, Clock, MapPin, FileText, Navigation } from "lucide-react";
-import { formatDate, formatTime } from "@/lib/utils";
-import type { Booking, ActivityType } from "@/types";
+import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
+import { Calendar, Clock, MapPin, FileText, ArrowLeft, User } from "lucide-react";
 
-export const metadata: Metadata = { title: "Visit Details" };
-
-interface Props {
-  params: { id: string };
-}
-
-export default async function SeniorBookingDetailPage({ params }: Props) {
+export default async function BookingDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, role")
-    .eq("user_id", user.id)
-    .single();
-  if (profile?.role !== "senior") redirect("/login");
-
-  const { data: bookingRaw } = await supabase
+  const { data: booking } = await supabase
     .from("bookings")
-    .select(`*, activity_type:activity_types(*)`)
+    .select(`
+      id, status, scheduled_date, scheduled_start_time, duration_hours,
+      location_description, destination_address, transportation_mode,
+      special_notes, companion_summary, total_amount, checked_in_at,
+      checked_out_at, visit_note, is_first_booking, created_at,
+      activity_types (name),
+      companion_profiles!bookings_companion_profile_id_fkey (
+        profiles!companion_profiles_profile_id_fkey (first_name, last_name)
+      )
+    `)
     .eq("id", params.id)
-    .eq("senior_profile_id", profile.id)
     .single();
 
-  if (!bookingRaw) notFound();
+  if (!booking) notFound();
 
-  const booking = bookingRaw as unknown as Booking & { activity_type: ActivityType };
-  const bookingStart = new Date(`${booking.scheduled_date}T${booking.scheduled_start_time}:00`);
-  const cancellable =
-    ["draft", "requested", "assigned"].includes(booking.status) && bookingStart > new Date();
+  const companion = (booking.companion_profiles as any)?.profiles;
+  const companionName = companion ? `${companion.first_name} ${companion.last_name}` : "Not yet assigned";
+  const activity = (booking.activity_types as any)?.name ?? "Activity";
+
+  const date = booking.scheduled_date
+    ? new Date(booking.scheduled_date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
+    : "Unknown date";
+
+  const statusColors: Record<string, string> = {
+    requested: "bg-blue-100 text-blue-700",
+    accepted: "bg-green-100 text-green-700",
+    assigned: "bg-purple-100 text-purple-700",
+    in_progress: "bg-yellow-100 text-yellow-700",
+    completed: "bg-gray-100 text-gray-700",
+    needs_review: "bg-orange-100 text-orange-700",
+    cancelled: "bg-red-100 text-red-700",
+  };
+
+  const statusColor = statusColors[booking.status] ?? "bg-gray-100 text-gray-700";
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <div>
-        <Link href="/senior/bookings" className="text-sm text-sage-600 hover:underline mb-2 inline-block">
-          ← Back to my visits
+    <div className="space-y-6 max-w-2xl">
+      <div className="flex items-center gap-3">
+        <Link href="/senior/bookings" className="text-gray-400 hover:text-gray-600 transition-colors">
+          <ArrowLeft className="h-5 w-5" />
         </Link>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="font-display text-senior-3xl font-bold text-gray-900">
-              {booking.activity_type?.name ?? "Companion Visit"}
-            </h1>
-            <div className="mt-1">
-              <BookingStatusBadge status={booking.status} />
-            </div>
-          </div>
-          {cancellable && (
-            <CancelBookingButton bookingId={booking.id} redirectPath="/senior/bookings" />
-          )}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">{activity}</h1>
+          <span className={`inline-block mt-1 text-xs font-medium px-2.5 py-1 rounded-full capitalize ${statusColor}`}>
+            {booking.status.replace("_", " ")}
+          </span>
         </div>
       </div>
 
-      <Card className="border-0 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-senior-base">Visit Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-3 text-senior-base text-gray-700">
-            <Calendar className="h-6 w-6 text-sage-500 flex-shrink-0" aria-hidden="true" />
-            <div>
-              <p className="text-xs text-gray-400">Date</p>
-              <p className="font-medium">{formatDate(booking.scheduled_date)}</p>
+      <div className="bg-white rounded-2xl border border-gray-200 divide-y divide-gray-100">
+        <div className="p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Visit Details</h2>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-gray-700">
+              <Calendar className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <span>{date}</span>
             </div>
-          </div>
-          <div className="flex items-center gap-3 text-senior-base text-gray-700">
-            <Clock className="h-6 w-6 text-sage-500 flex-shrink-0" aria-hidden="true" />
-            <div>
-              <p className="text-xs text-gray-400">Time</p>
-              <p className="font-medium">
-                {formatTime(booking.scheduled_start_time)} &mdash;{" "}
-                {booking.duration_hours} hour{booking.duration_hours !== 1 ? "s" : ""}
-              </p>
+            <div className="flex items-center gap-3 text-gray-700">
+              <Clock className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <span>{booking.scheduled_start_time ?? "TBD"} — {booking.duration_hours} hour{booking.duration_hours !== 1 ? "s" : ""}</span>
             </div>
-          </div>
-          <div className="flex items-start gap-3 text-senior-base text-gray-700">
-            <MapPin className="h-6 w-6 text-sage-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
-            <div>
-              <p className="text-xs text-gray-400">Meeting address</p>
-              <p className="font-medium">{booking.location_description}</p>
-            </div>
-          </div>
-          {booking.destination_address && (
-            <div className="flex items-start gap-3 text-senior-base text-gray-700">
-              <Navigation className="h-6 w-6 text-sage-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
-              <div>
-                <p className="text-xs text-gray-400">Destination</p>
-                <p className="font-medium">{booking.destination_address}</p>
+            {booking.location_description && (
+              <div className="flex items-center gap-3 text-gray-700">
+                <MapPin className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                <span>{booking.location_description}</span>
               </div>
-            </div>
-          )}
-          {booking.special_notes && (
-            <div className="flex items-start gap-3 text-senior-base text-gray-700">
-              <FileText className="h-6 w-6 text-sage-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
-              <div>
-                <p className="text-xs text-gray-400">Notes</p>
-                <p className="font-medium">{booking.special_notes}</p>
+            )}
+            {booking.destination_address && (
+              <div className="flex items-start gap-3 text-gray-700">
+                <MapPin className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                <span>{booking.destination_address}</span>
               </div>
-            </div>
+            )}
+            {booking.transportation_mode && (
+              <div className="flex items-center gap-3 text-gray-700">
+                <FileText className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                <span>Transport: {booking.transportation_mode}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="p-6 space-y-2">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Companion</h2>
+          <div className="flex items-center gap-3 text-gray-700 mt-3">
+            <User className="h-5 w-5 text-gray-400" />
+            <span>{companionName}</span>
+          </div>
+          {booking.companion_summary && (
+            <p className="text-sm text-gray-500 mt-2 leading-relaxed">{booking.companion_summary}</p>
           )}
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Rebook */}
-      {booking.status === "completed" && (
-        <Card className="border-0 shadow-sm bg-sage-50">
-          <CardContent className="pt-5 pb-5">
-            <p className="text-senior-base font-medium text-sage-800 mb-3">
-              Would you like to book this activity again?
-            </p>
-            <Button asChild size="lg">
-              <Link href={`/senior/bookings/new`}>
-                Book another visit
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+        {booking.special_notes && (
+          <div className="p-6 space-y-2">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Special Notes</h2>
+            <p className="text-gray-700 text-sm leading-relaxed mt-3">{booking.special_notes}</p>
+          </div>
+        )}
 
-      {/* Support */}
-      <Card className="border-0 shadow-sm border-sage-100 bg-sage-50">
-        <CardContent className="pt-5 pb-5">
-          <p className="text-senior-base font-medium text-sage-800 mb-1">Need help with this visit?</p>
-          <p className="text-senior-lg font-bold text-sage-700">1-800-555-2273</p>
-          <p className="text-sm text-gray-500">Available Monday–Friday, 8 AM–6 PM</p>
-        </CardContent>
-      </Card>
+        {booking.visit_note && (
+          <div className="p-6 space-y-2">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Visit Note</h2>
+            <p className="text-gray-700 text-sm leading-relaxed mt-3">{booking.visit_note}</p>
+          </div>
+        )}
+
+        <div className="p-6 flex items-center justify-between">
+          <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Total</span>
+          <span className="text-lg font-bold text-gray-900">
+            ${Number(booking.total_amount ?? 0).toFixed(2)}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex gap-3">
+        {booking.status === "completed" || booking.status === "needs_review" ? (
+          <Link
+            href={`/senior/bookings/${params.id}/feedback`}
+            className="flex-1 text-center bg-sage-600 hover:bg-sage-700 text-white py-3 rounded-xl font-medium transition-colors"
+          >
+            Leave Feedback
+          </Link>
+        ) : null}
+        <Link
+          href={`/senior/bookings/${params.id}/receipt`}
+          className="flex-1 text-center border border-gray-200 hover:bg-gray-50 text-gray-700 py-3 rounded-xl font-medium transition-colors"
+        >
+          View Receipt
+        </Link>
+      </div>
     </div>
   );
 }

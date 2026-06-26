@@ -7,6 +7,7 @@ import { AlertTriangle } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import Link from "next/link";
 import type { Profile, SeniorProfile, ActivityType } from "@/types";
+import { getServerTranslation } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "New Booking" };
 
@@ -72,21 +73,20 @@ export default async function NewFamilyBookingPage({ searchParams }: Props) {
     .order("sort_order", { ascending: true });
   const activityTypes = (activityTypesRaw ?? []) as unknown as ActivityType[];
 
+  const { t } = getServerTranslation();
+
   if (seniors.length === 0) {
     return (
       <div className="max-w-2xl">
-        <h1 className="font-display text-senior-3xl font-bold text-gray-900 mb-6">New Booking</h1>
+        <h1 className="font-display text-senior-3xl font-bold text-gray-900 mb-6">{t("bookingPage.family.title")}</h1>
         <Alert variant="warning">
           <AlertTriangle className="h-4 w-4" aria-hidden="true" />
           <div>
-            <p className="font-medium">No seniors linked to your account</p>
-            <p className="text-sm mt-1">
-              You need to{" "}
-              <Link href="/family/seniors/add" className="underline font-medium">
-                add a senior
-              </Link>{" "}
-              before you can create a booking.
-            </p>
+            <p className="font-medium">{t("bookingPage.family.noSeniorsTitle")}</p>
+            <p className="text-sm mt-1">{t("bookingPage.family.noSeniorsDesc")}</p>
+            <Link href="/family/seniors/add" className="underline font-medium text-sm mt-1 inline-block">
+              {t("bookingPage.family.addSeniorLink")}
+            </Link>
           </div>
         </Alert>
       </div>
@@ -101,25 +101,25 @@ export default async function NewFamilyBookingPage({ searchParams }: Props) {
     <div className="max-w-2xl">
       <div className="mb-8">
         <Link href="/family/bookings" className="text-sm text-sage-600 hover:underline mb-2 inline-block">
-          ← Back to bookings
+          {t("bookingPage.family.backLink")}
         </Link>
-        <h1 className="font-display text-senior-3xl font-bold text-gray-900">New Booking</h1>
+        <h1 className="font-display text-senior-3xl font-bold text-gray-900">{t("bookingPage.family.title")}</h1>
         <p className="text-senior-lg text-gray-500 mt-1">
-          Request a companion visit in a few simple steps.
+          {t("bookingPage.family.subtitle")}
         </p>
       </div>
 
       <div className="mb-4 flex items-center gap-3 rounded-xl border border-sage-100 bg-sage-50 px-4 py-3">
         <span className="text-lg">🎙️</span>
         <div className="flex-1">
-          <p className="text-sm font-medium text-sage-800">Prefer to describe the request in your own words?</p>
-          <p className="text-xs text-sage-600">Try voice-assisted booking — we'll extract the details for you.</p>
+          <p className="text-sm font-medium text-sage-800">{t("bookingPage.voicePromoTitle")}</p>
+          <p className="text-xs text-sage-600">{t("bookingPage.voicePromoSubtitle")}</p>
         </div>
         <Link
           href="/family/bookings/new/voice"
           className="rounded-lg border border-sage-300 bg-white px-3 py-1.5 text-xs font-semibold text-sage-700 hover:bg-sage-50 whitespace-nowrap"
         >
-          Try it →
+          {t("bookingPage.voicePromoLink")}
         </Link>
       </div>
 

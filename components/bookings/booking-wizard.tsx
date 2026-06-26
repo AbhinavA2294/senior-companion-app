@@ -32,6 +32,7 @@ import type { ActivityType, Profile, SeniorProfile } from "@/types";
 import { formatDate, formatTime } from "@/lib/utils";
 import { calculateBookingCost } from "@/lib/payments/payment-service";
 import { PriceBreakdown } from "@/components/payments/price-breakdown";
+import { useTranslation } from "@/lib/i18n";
 
 interface SeniorOption {
   profile: Profile;
@@ -48,15 +49,6 @@ interface BookingWizardProps {
   successRedirect: string;
 }
 
-const STEPS = [
-  { label: "Senior",   icon: User },
-  { label: "Activity", icon: FileText },
-  { label: "Schedule", icon: Calendar },
-  { label: "Location", icon: MapPin },
-  { label: "Notes",    icon: FileText },
-  { label: "Review",   icon: Check },
-];
-
 const DURATION_OPTIONS = [2, 3, 4, 5, 6];
 const START_TIMES = Array.from({ length: 28 }, (_, i) => {
   const totalMinutes = 8 * 60 + i * 30;
@@ -65,22 +57,21 @@ const START_TIMES = Array.from({ length: 28 }, (_, i) => {
   return `${hh}:${mm}`;
 });
 
-const DISCLAIMER_TEXT = `Senior Companion provides non-medical companionship and chaperone services only.
-Our companions are not healthcare providers and cannot administer medication, provide medical
-advice, or perform any clinical services.
-
-Important: Please do not include medical records, medication information, financial information,
-insurance details, Social Security numbers, or sensitive personal documents in your booking notes.
-
-By submitting this request you confirm that the service is for non-medical companionship only
-and that you have read and agreed to our Terms of Service and Service Boundaries.`;
-
 export function BookingWizard({
   seniors,
   activityTypes,
   defaultSeniorId,
   successRedirect,
 }: BookingWizardProps) {
+  const { t } = useTranslation();
+  const STEPS = [
+    { label: t("wizard.steps.senior"),   icon: User },
+    { label: t("wizard.steps.activity"), icon: FileText },
+    { label: t("wizard.steps.schedule"), icon: Calendar },
+    { label: t("wizard.steps.location"), icon: MapPin },
+    { label: t("wizard.steps.notes"),    icon: FileText },
+    { label: t("wizard.steps.review"),   icon: Check },
+  ];
   const router = useRouter();
   const [step, setStep] = useState(defaultSeniorId ? 1 : 0);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -196,21 +187,21 @@ export function BookingWizard({
         return (
           <div>
             <h2 className="text-senior-xl font-semibold text-gray-900 mb-1">
-              Who is this visit for?
+              {t("wizard.selectSenior.title")}
             </h2>
             <p className="text-senior-sm text-gray-500 mb-6">
-              Select the person you are booking a companion for.
+              {t("wizard.selectSenior.subtitle")}
             </p>
 
             {seniors.length === 0 ? (
               <Alert variant="info">
                 <AlertTriangle className="h-4 w-4" aria-hidden="true" />
                 <p>
-                  You have not added any seniors yet.{" "}
+                  {t("wizard.selectSenior.noSeniorsMessage")}{" "}
                   <a href="/family/seniors/add" className="underline font-medium">
-                    Add a senior
+                    {t("wizard.selectSenior.addSeniorLink")}
                   </a>{" "}
-                  before making a booking.
+                  {t("wizard.selectSenior.noSeniorsAfter")}
                 </p>
               </Alert>
             ) : (
@@ -271,10 +262,10 @@ export function BookingWizard({
         return (
           <div>
             <h2 className="text-senior-xl font-semibold text-gray-900 mb-1">
-              What type of activity?
+              {t("wizard.selectActivity.title")}
             </h2>
             <p className="text-senior-sm text-gray-500 mb-6">
-              Choose the activity you would like to book a companion for.
+              {t("wizard.selectActivity.subtitle")}
             </p>
 
             <div
@@ -321,16 +312,18 @@ export function BookingWizard({
         return (
           <div>
             <h2 className="text-senior-xl font-semibold text-gray-900 mb-1">
-              When is the visit?
+              {t("wizard.schedule.title")}
             </h2>
             <p className="text-senior-sm text-gray-500 mb-6">
-              Bookings must be scheduled at least {BOOKING_ADVANCE_HOURS} hours in advance.
-              Visits may be {BOOKING_MIN_HOURS}–{BOOKING_MAX_HOURS} hours long and cannot extend past midnight.
+              {t("wizard.schedule.subtitle")
+                .replace("{hours}", String(BOOKING_ADVANCE_HOURS))
+                .replace("{min}", String(BOOKING_MIN_HOURS))
+                .replace("{max}", String(BOOKING_MAX_HOURS))}
             </p>
 
             <div className="space-y-5">
               <div>
-                <Label htmlFor="scheduled_date">Date</Label>
+                <Label htmlFor="scheduled_date">{t("wizard.schedule.dateLabel")}</Label>
                 <Input
                   id="scheduled_date"
                   type="date"
@@ -347,14 +340,14 @@ export function BookingWizard({
               </div>
 
               <div>
-                <Label htmlFor="scheduled_start_time">Start time</Label>
+                <Label htmlFor="scheduled_start_time">{t("wizard.schedule.timeLabel")}</Label>
                 <select
                   id="scheduled_start_time"
                   className="mt-1 flex h-11 w-full rounded-lg border border-input bg-background px-3 py-2 text-senior-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   aria-describedby={errors.scheduled_start_time ? "time-error" : undefined}
                   {...register("scheduled_start_time")}
                 >
-                  <option value="">Select a start time…</option>
+                  <option value="">{t("wizard.schedule.timePlaceholder")}</option>
                   {START_TIMES.map((t) => (
                     <option key={t} value={t}>
                       {formatTime(t)}
@@ -369,8 +362,8 @@ export function BookingWizard({
               </div>
 
               <div>
-                <Label>Duration</Label>
-                <div className="mt-1 flex gap-2 flex-wrap" role="group" aria-label="Duration">
+                <Label>{t("wizard.schedule.durationLabel")}</Label>
+                <div className="mt-1 flex gap-2 flex-wrap" role="group" aria-label={t("wizard.schedule.durationLabel")}>
                   {DURATION_OPTIONS.map((hours) => {
                     const isSelected = watchedValues.duration_hours === hours;
                     return (
@@ -405,20 +398,20 @@ export function BookingWizard({
         return (
           <div>
             <h2 className="text-senior-xl font-semibold text-gray-900 mb-1">
-              Where is the visit?
+              {t("wizard.location.title")}
             </h2>
             <p className="text-senior-sm text-gray-500 mb-6">
-              Enter the address where the companion should meet the senior.
+              {t("wizard.location.subtitle")}
             </p>
 
             <div className="space-y-5">
               <div>
                 <Label htmlFor="location_description">
-                  Meeting address <span aria-hidden="true" className="text-destructive">*</span>
+                  {t("wizard.location.meetingLabel")} <span aria-hidden="true" className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="location_description"
-                  placeholder="e.g. 142 Maple Street, Springfield, IL 62702"
+                  placeholder={t("wizard.location.meetingPlaceholder")}
                   className="mt-1"
                   aria-describedby={errors.location_description ? "location-error" : undefined}
                   aria-required="true"
@@ -433,25 +426,24 @@ export function BookingWizard({
 
               <div>
                 <Label htmlFor="destination_address">
-                  Destination address{" "}
-                  <span className="text-gray-400 font-normal">(optional)</span>
+                  {t("wizard.location.destinationLabel")}{" "}
+                  <span className="text-gray-400 font-normal">{t("wizard.location.destinationOptional")}</span>
                 </Label>
                 <Input
                   id="destination_address"
-                  placeholder="e.g. Springfield Family Medicine, 500 Health Blvd"
+                  placeholder={t("wizard.location.destinationPlaceholder")}
                   className="mt-1"
                   {...register("destination_address")}
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  If the visit involves travelling to a specific location, enter it here.
+                  {t("wizard.location.destinationHint")}
                 </p>
               </div>
 
               <Alert variant="info">
                 <AlertTriangle className="h-4 w-4" aria-hidden="true" />
                 <p className="text-sm">
-                  <strong>Note:</strong> Companions do not provide personal-vehicle transportation.
-                  For outings, please arrange rideshare, public transit, or walking.
+                  {t("wizard.location.transportNote")}
                 </p>
               </Alert>
             </div>
@@ -463,22 +455,22 @@ export function BookingWizard({
         return (
           <div>
             <h2 className="text-senior-xl font-semibold text-gray-900 mb-1">
-              Any additional notes?
+              {t("wizard.notes.title")}
             </h2>
             <p className="text-senior-sm text-gray-500 mb-6">
-              Share anything that will help the companion prepare — preferences, reminders, or context about this visit.
+              {t("wizard.notes.subtitle")}
             </p>
 
             <div>
               <Label htmlFor="special_notes">
-                Notes{" "}
-                <span className="text-gray-400 font-normal">(optional, max 1,000 characters)</span>
+                {t("wizard.notes.label")}{" "}
+                <span className="text-gray-400 font-normal">{t("wizard.notes.optional")}</span>
               </Label>
               <Textarea
                 id="special_notes"
                 className="mt-1"
                 rows={5}
-                placeholder="e.g. Eleanor enjoys talking about her garden. Please arrive 5 minutes early — she takes a few minutes to get ready."
+                placeholder={t("wizard.notes.placeholder")}
                 {...register("special_notes")}
               />
               {errors.special_notes && (
@@ -491,9 +483,7 @@ export function BookingWizard({
             <Alert variant="warning" className="mt-4">
               <AlertTriangle className="h-4 w-4" aria-hidden="true" />
               <p className="text-sm">
-                <strong>Important:</strong> Please do not include medical records, medication
-                information, financial information, insurance details, Social Security numbers, or
-                sensitive personal documents in your notes.
+                {t("wizard.notes.safetyWarning")}
               </p>
             </Alert>
           </div>
@@ -505,10 +495,10 @@ export function BookingWizard({
         return (
           <div>
             <h2 className="text-senior-xl font-semibold text-gray-900 mb-1">
-              Review your request
+              {t("wizard.review.title")}
             </h2>
             <p className="text-senior-sm text-gray-500 mb-6">
-              Please review the details below and acknowledge the service disclaimer before submitting.
+              {t("wizard.review.subtitle")}
             </p>
 
             {/* Price summary — shown before booking details */}
@@ -516,30 +506,32 @@ export function BookingWizard({
 
             {/* Summary */}
             <div className="bg-gray-50 rounded-xl p-5 space-y-3 mb-6">
-              <SummaryRow label="Senior" value={
+              <SummaryRow label={t("wizard.review.seniorLabel")} value={
                 selectedSenior
                   ? `${selectedSenior.profile.first_name} ${selectedSenior.profile.last_name}`
                   : "—"
               } />
-              <SummaryRow label="Activity" value={selectedActivity?.name ?? "—"} />
+              <SummaryRow label={t("wizard.review.activityLabel")} value={selectedActivity?.name ?? "—"} />
               <SummaryRow
-                label="Date"
+                label={t("wizard.review.dateLabel")}
                 value={watchedValues.scheduled_date ? formatDate(watchedValues.scheduled_date) : "—"}
               />
               <SummaryRow
-                label="Start time"
+                label={t("wizard.review.timeLabel")}
                 value={watchedValues.scheduled_start_time ? formatTime(watchedValues.scheduled_start_time) : "—"}
               />
               <SummaryRow
-                label="Duration"
-                value={watchedValues.duration_hours ? `${watchedValues.duration_hours} hours` : "—"}
+                label={t("wizard.review.durationLabel")}
+                value={watchedValues.duration_hours
+                  ? t("wizard.review.durationValue").replace("{hours}", String(watchedValues.duration_hours))
+                  : "—"}
               />
-              <SummaryRow label="Meeting address" value={watchedValues.location_description || "—"} />
+              <SummaryRow label={t("wizard.review.meetingLabel")} value={watchedValues.location_description || "—"} />
               {watchedValues.destination_address && (
-                <SummaryRow label="Destination" value={watchedValues.destination_address} />
+                <SummaryRow label={t("wizard.review.destinationLabel")} value={watchedValues.destination_address} />
               )}
               {watchedValues.special_notes && (
-                <SummaryRow label="Notes" value={watchedValues.special_notes} />
+                <SummaryRow label={t("wizard.review.notesLabel")} value={watchedValues.special_notes} />
               )}
             </div>
 
@@ -547,10 +539,10 @@ export function BookingWizard({
             <div className="border border-amber-200 bg-amber-50 rounded-xl p-5 mb-5">
               <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-600" aria-hidden="true" />
-                Service Disclaimer
+                {t("wizard.review.disclaimerTitle")}
               </h3>
               <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
-                {DISCLAIMER_TEXT}
+                {t("wizard.review.disclaimerText")}
               </p>
             </div>
 
@@ -564,9 +556,7 @@ export function BookingWizard({
               />
               <div>
                 <Label htmlFor="disclaimer_acknowledged" className="cursor-pointer leading-relaxed">
-                  I have read and understood the service disclaimer. I confirm this booking is for
-                  non-medical companionship only, and my notes do not contain medical, financial,
-                  or other sensitive personal information.
+                  {t("wizard.review.checkboxLabel")}
                 </Label>
                 {errors.disclaimer_acknowledged && (
                   <p id="disclaimer-error" role="alert" className="mt-1 text-sm text-destructive">
@@ -655,16 +645,16 @@ export function BookingWizard({
           className={isFirstStep ? "invisible" : ""}
         >
           <ChevronLeft className="mr-1 h-4 w-4" aria-hidden="true" />
-          Back
+          {t("wizard.nav.back")}
         </Button>
 
         {isLastStep ? (
           <Button type="submit" variant="default" size="lg" disabled={isPending}>
-            {isPending ? "Submitting…" : "Submit Request"}
+            {isPending ? t("wizard.nav.submitting") : t("wizard.nav.submit")}
           </Button>
         ) : (
           <Button type="button" onClick={handleNext}>
-            Next
+            {t("wizard.nav.next")}
             <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />
           </Button>
         )}

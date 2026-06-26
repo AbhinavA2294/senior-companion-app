@@ -21,9 +21,10 @@ export async function GET(request: Request) {
           .from("profiles")
           .select("role")
           .eq("user_id", user.id)
-          .single();
+          .maybeSingle();
 
-        const role = (profile?.role ?? "senior") as UserRole;
+        const metaRole = user.user_metadata?.role as string | undefined;
+        const role = (profile?.role ?? metaRole ?? "senior") as UserRole;
         return NextResponse.redirect(`${origin}${getDashboardPath(role)}`);
       }
     }

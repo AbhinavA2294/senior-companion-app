@@ -1,4 +1,3 @@
-$content = @'
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -26,6 +25,10 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
     .eq("user_id", user.id)
     .single();
   if (adminProfile?.role !== "admin") redirect("/login");
+
+
+
+  const admin = createAdminClient();
 
   const admin = createAdminClient();
 

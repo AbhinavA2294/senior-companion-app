@@ -1,0 +1,8 @@
+﻿data = open('app/(dashboard)/admin/companions/[id]/page.tsx', encoding='utf-8').read()
+data = data.replace('await supabase\n    .from("companion_profiles")', 'await admin\n    .from("companion_profiles")')
+data = data.replace('await supabase\n    .from("profiles")\n    .select("*")', 'await admin\n    .from("profiles")\n    .select("*")')
+data = data.replace('await supabase\n    .from("companion_references")', 'await admin\n    .from("companion_references")')
+data = data.replace('await supabase\n    .from("companion_status_history")', 'await admin\n    .from("companion_status_history")')
+open('app/(dashboard)/admin/companions/[id]/page.tsx', 'w', encoding='utf-8').write(data)
+print('supabase.from count:', data.count('supabase\n    .from'))
+print('admin.from count:', data.count('admin\n    .from'))

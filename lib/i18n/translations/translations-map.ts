@@ -102,7 +102,10 @@ export const SUPPORTED_LOCALES: SupportedLocale[] = [
 
 export const TRANSLATIONS: Record<string, Record<string, unknown>> = {
   en, es, hi, ta, zh, ar, bn, pt, ru, ja, pa, mr, te, ko, fr, de, vi, ur, tr, it, nl, uk, gu, kn, ml,
-  pl, sv, no, da, fi, id, ro, th, sw, tl, fa, he, cs, el, bg, "or": or_,
+  pl, sv, da, ro, th, sw, tl, fa, he, cs, el, bg,
+   "no": no_,
+   "id": id_,
+   "or": or_,
 };
 
 export function getNestedValue(obj: Record<string, unknown>, key: string): string {

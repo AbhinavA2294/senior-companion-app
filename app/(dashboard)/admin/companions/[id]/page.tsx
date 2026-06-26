@@ -30,8 +30,7 @@ export default async function AdminCompanionDetailPage({ params }: Props) {
 
   const admin = createAdminClient();
 
-  const admin = createAdminClient();
-
+  
   const { data: cp } = await admin
     .from("companion_profiles")
     .select("*")

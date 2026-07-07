@@ -21,6 +21,7 @@ export async function assignCompanionsToBooking(
   const supabase = createClient();
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
   if (authError || !user) return { success: false, error: "Your session has expired. Please sign in again." };
 
@@ -119,6 +120,7 @@ export async function respondToAssignment(
   const supabase = createClient();
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
   if (authError || !user) return { success: false, error: "Your session has expired. Please sign in again." };
 
@@ -253,6 +255,7 @@ export async function updateCompanionStatus(
   const supabase = createClient();
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
   if (authError || !user) return { success: false, error: "Your session has expired. Please sign in again." };
 

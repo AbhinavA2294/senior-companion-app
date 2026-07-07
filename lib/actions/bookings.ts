@@ -103,8 +103,7 @@ export async function createBooking(raw: BookingFormData): Promise<ActionResult>
     .single();
 
   if (insertErr || !booking) {
-    console.error("Booking insert error:", JSON.stringify(insertErr, null, 2));
-    return { success: false, error: insertErr?.message ?? "Failed to submit booking request. Please try again." };
+    return { success: false, error: "Failed to submit booking request. Please try again." };
   }
 
   const role = callerProfile.role as string;

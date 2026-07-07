@@ -27,8 +27,11 @@ export async function submitBookingFeedback(
   const data = parsed.data;
 
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated." };
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) return { success: false, error: "Your session has expired. Please sign in again." };
 
   const { data: profile } = await supabase
     .from("profiles")

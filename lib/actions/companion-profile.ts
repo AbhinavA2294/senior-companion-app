@@ -26,8 +26,9 @@ export async function upsertCompanionOnboarding(
   const supabase = createClient();
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated." };
+  if (authError || !user) return { success: false, error: "Your session has expired. Please sign in again." };
 
   const { data: callerProfile } = await supabase
     .from("profiles")
@@ -143,8 +144,9 @@ export async function upsertCompanionAvailability(
   const supabase = createClient();
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated." };
+  if (authError || !user) return { success: false, error: "Your session has expired. Please sign in again." };
 
   const { data: callerProfile } = await supabase
     .from("profiles")

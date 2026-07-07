@@ -22,7 +22,7 @@ export async function assignCompanionsToBooking(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated." };
+  if (authError || !user) return { success: false, error: "Your session has expired. Please sign in again." };
 
   const { data: callerProfile } = await supabase
     .from("profiles")
@@ -120,7 +120,7 @@ export async function respondToAssignment(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated." };
+  if (authError || !user) return { success: false, error: "Your session has expired. Please sign in again." };
 
   const { data: callerProfile } = await supabase
     .from("profiles")
@@ -254,7 +254,7 @@ export async function updateCompanionStatus(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated." };
+  if (authError || !user) return { success: false, error: "Your session has expired. Please sign in again." };
 
   const { data: callerProfile } = await supabase
     .from("profiles")

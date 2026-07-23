@@ -29,6 +29,7 @@ const RegisterSchema = z.object({
     .max(30)
     .regex(/^[\d\s\+\-\(\)\.]+$/, "Invalid phone number format.")
     .optional()
+    .nullable()
     .or(z.literal("")),
   ui_language: z.enum(SUPPORTED_LOCALES).optional().default("en"),
 });

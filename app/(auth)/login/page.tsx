@@ -42,6 +42,7 @@ export default function LoginPage() {
     });
 
     if (error) {
+      console.error("Login failed:", error.status, error.code, error.message);
       setServerError(t("auth.login.error"));
       setIsLoading(false);
       return;
@@ -164,7 +165,7 @@ export default function LoginPage() {
               )}
             </div>
 
-            <Button type="button" size="lg" className="w-full" disabled={isLoading} onClick={() => handleSubmit(onSubmit)()}>
+            <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden="true" />
@@ -176,14 +177,6 @@ export default function LoginPage() {
             </Button>
 
           </form>
-
-          <button 
-            type="button" 
-            onClick={() => alert("JavaScript is working!")}
-            style={{width:"100%",marginTop:"16px",padding:"8px",background:"red",color:"white",borderRadius:"8px",border:"none",cursor:"pointer"}}
-          >
-            Test JS
-          </button>
 
           <p className="mt-6 text-center text-senior-base text-gray-500">
             {t("auth.login.noAccount")}{" "}
